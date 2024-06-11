@@ -31,6 +31,29 @@ def measure_performance(dataset, model):
         runner.set_description(f"Accuracy: {correct.item() / (i+1):.3f}, Loss: {loss.item() / (i+1):.3f}")
     return correct / len(dataset), loss / len(dataset)
 
+
+def calculate_iterations(start_lower, start_upper, end_lower, end_upper):
+    if start_upper <= start_lower or end_upper <= end_lower:
+        return 0  # No valid iterations if ranges are non-positive or improperly defined
+
+    # Maximum valid start_layer is start_upper - 1
+    # Minimum valid end_layer is start_layer + 1, which translates to start_lower + 1 for start_lower
+    if end_upper <= start_lower + 1:
+        return 0  # No valid end_layer values if end_upper is less than or equal to start_lower + 1
+
+    # Applying the formula: Summing (end_upper - k - 1) for k from start_lower to start_upper - 1
+    total_iterations = 0
+    for k in range(start_lower, start_upper):
+        if k + 1 < end_upper:  # Ensure that there is at least one valid end_layer
+            total_iterations += (end_upper - (k + 1))
+    return total_iterations
+
+def format_dict_single_line_custom(d):
+    # Create a formatted string from dictionary entries
+    items = [f"{k}: {f'{v:.4f}' if isinstance(v, float) else v}" for k, v in d.items()]
+    # Join all items in a single line
+    return ', '.join(items)
+
 def broadcast_kv_cache(cache : HookedTransformerKeyValueCache, n : int):
     """
     Broadcasts the key-value cache for parallel processing, reshaping its elements

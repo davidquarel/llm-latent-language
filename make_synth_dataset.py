@@ -32,6 +32,7 @@ from tuned_lens_wrap import load_tuned_lens
 from dq_utils import proj, entropy, plot_ci, is_chinese_char, broadcast_kv_cache, printd
 from logit_lens import get_logits, plot_logit_lens_latents, latent_heatmap
 from config_argparse import try_parse_args
+from const import language_labels, translation_bank, lang2name
 __DEBUG__ = True
 # %%
 torch.set_grad_enabled(False)
@@ -58,33 +59,6 @@ model = HookedTransformer.from_pretrained_no_processing(cfg.model_name,
                                                             dtype=cfg.model_dtype)
 vocab = model.tokenizer.get_vocab()
 # %%
-
-
-language_labels = {
-    'zh': '中文',
-    'en': 'English',
-    'fr': 'Français',
-    'de': 'Deutsch',
-    'ru': 'Русский'
-}
-    #{'day': {'zh': '日', 'en': 'day', 'fr': 'jour', 'de': 'Tag', 'ru': 'день'},
-
-all_translation_banks = {'gemma' :
-                            {'water': {'zh': '水', 'en': 'water', 'fr': 'eau', 'de': 'Wasser', 'ru': 'вода'},
-                            'man': {'zh': '男', 'en': 'man', 'fr': 'homme', 'de': 'Mann', 'ru': 'муж'},
-                            'five': {'zh': '五', 'en': 'five', 'fr': 'cinq', 'de': 'fünf', 'ru': 'три'},
-                            'new': {'zh': '新', 'en': 'village', 'fr': 'nouveau', 'de': 'neu', 'ru': 'пя'}},
-                        'llama':
-                            {'day': {'zh': '日', 'en': 'day', 'fr': 'jour', 'de': 'Tag', 'ru': 'день'},
-                            'man': {'zh': '男', 'en': 'man', 'fr': 'homme', 'de': 'Mann', 'ru': 'муж'},
-                            'five': {'zh': '五', 'en': 'five', 'fr': 'cinq', 'de': 'fünf', 'ru': 'три'},
-                            'new': {'zh': '新', 'en': 'village', 'fr': 'nouveau', 'de': 'neu', 'ru': 'пя'}}
-                        }
-
-# just use the same bank for both
-translation_bank = all_translation_banks['llama']               
-    
-lang2name = {'fr': 'Français', 'de': 'Deutsch', 'en': 'English', 'zh': '中文', 'ru': 'Русский'}
 
 # all_translation_bank = [
 #     {'day': {'zh': '日', 'en': 'day', 'fr': 'jour', 'de': 'Tag', 'ru': 'день'},
