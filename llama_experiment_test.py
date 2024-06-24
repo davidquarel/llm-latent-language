@@ -47,7 +47,7 @@ class Config:
     dest_lang: str = 'zh'
     latent_lang: str = 'en'
     model_size: str = '7b'
-    model_name: str = 'meta-llama/Llama-2-%s-hf' % model_size
+    model_name: str = 'gemma-2b'  #'meta-llama/Llama-2-%s-hf' % model_size
     single_token_only: bool = False
     multi_token_only: bool = False
     out_dir: str = './visuals'
@@ -126,31 +126,75 @@ try:
 except:
     pass
 
-if 'LOAD_MODEL' not in globals():
-    LOAD_MODEL = False
-    model = HookedTransformer.from_pretrained_no_processing(cfg.model_name,
-                                                            device=device, 
-                                                            dtype = torch.float16)
-    tokenizer_vocab = model.tokenizer.get_vocab() # type: ignore    
-    if cfg.use_tuned_lens or cfg.use_reverse_lens:
-        tuned_lens = load_tuned_lens(model)
-        model.tuned_lens = tuned_lens
-    if cfg.use_reverse_lens:
-        reverse_lens = ReverseLens.from_tuned_lens(tuned_lens)
-        model.reverse_lens = reverse_lens
-# %%
-# df_src = pd.read_csv(os.path.join(cfg.dataset_path, cfg.src_lang, 'clean.csv')).reindex()
-# df_dest = pd.read_csv(os.path.join(cfg.dataset_path, cfg.dest_lang, 'clean.csv')).reindex()
-# df_raw_data = gen_data.merge_datasets(df_src, df_dest, tokenizer_vocab, cfg)
-df_raw_data = construct_dataset(**cfg_dict)
-dataset = gen_data.gen_batched_dataset(df_raw_data, model.tokenizer, **cfg_dict)
-# %%
-from transformer_lens.past_key_value_caching import HookedTransformerKeyValueCache
-from logit_lens import get_logits_batched
-suffix_toks = dataset['suffixes']
-prefix_toks = dataset['prompt_tok']
+model = HookedTransformer.from_pretrained_no_processing(cfg.model_name,
+                                                        device=device, 
+                                                        dtype = torch.float16)
+tokenizer_vocab = model.tokenizer.get_vocab() # type: ignore    
 
-latents, logits = get_logits_batched(prefix_toks, suffix_toks, model, **cfg_dict)
-#with_cache_logits = model(rest_of_tokens, past_kv_cache=kv_cache)
+
 # %%
+def translate(src_word, model):
+    df_fr = pd.read_csv(os.path.join(cfg.dataset_path, 'llama2_filtered.csv'))
+    prompt = gen_data.generate_translation_prompt(src_word, **cfg_dict)
+    #with_cache_logits = model(rest_of_tokens, past_kv_cache=kv_cache)
+
+    prompt_tok = model.tokenizer(prompt, return_tensors='pt')['input_ids'].to(device)
+    all_post_resid = [f'blocks.{i}.hook_resid_post' for i in range(model.cfg.n_layers)]
+    logits, cache = model.run_with_cache(prompt_tok, names_filter = all_post_resid)
+    latents = torch.stack([c[0, -1] for c in cache.values()],  dim=0)
+    approx_logits = model.unembed(model.ln_final(latents.unsqueeze(0))).squeeze() #(layers, vocab)
+    approx_logprobs= F.log_softmax(approx_logits, dim=-1)
+    top_logprobs, top_idx = torch.topk(approx_logprobs, 10, dim=-1)
+    top_logprobs = top_logprobs.cpu().numpy()
+    top_idx = top_idx.cpu().numpy()
+    top_tokens = [model.tokenizer.convert_ids_to_tokens(x) for x in top_idx]
+
+    print(f"Prompt: {prompt}")
+    print(f"Top Tokens: {top_tokens[-1]}")
+    print(f"Top Probs: {np.exp(top_logprobs[-1])}")
+    
+    n_layers = model.cfg.n_layers
+    top_k = 10
+    fig, ax = plt.subplots(figsize=(10, 12))
+    # Create the heatmap
+    cax = ax.imshow(top_logprobs, cmap='cividis', aspect='auto')
+    from matplotlib.font_manager import FontProperties
+
+    font_properties = FontProperties(fname='NotoSansSC-Bold.ttf')
+
+    # Add colorbar
+    cbar = fig.colorbar(cax)
+    cbar.set_label('Probability')
+
+    def get_text_color(background_color):
+        r, g, b, _ = background_color
+        brightness = 0.299 * r + 0.587 * g + 0.114 * b
+        return 'white' if brightness < 0.3 else 'black'
+
+    from matplotlib.colors import Normalize
+    from matplotlib.cm import ScalarMappable
+
+    norm = Normalize(vmin=0, vmax=1)
+    sm = ScalarMappable(norm=norm, cmap='cividis')
+    # Set axis labels
+    ax.set_ylabel('Layers')
+    # Annotate each cell with the token
+    for i in range(n_layers):
+        for j in range(top_k):
+            token = top_tokens[i][j]
+            logprob = top_logprobs[i, j]
+            
+            color = sm.to_rgba(logprob)
+            text_color = get_text_color(color)
+            
+            ax.text(j, i, token, ha='center', va='center', color='black', 
+                    fontsize=10, font_properties = font_properties)
+
+    plt.title(f'{model.cfg.model_name} {cfg.src_lang}: {src_word} -> {cfg.dest_lang}:?')
+    plt.savefig(f'./logit_lenses/gemma_{cfg.src_lang}_{src_word}_to_{cfg.dest_lang}.svg')
+    plt.tight_layout()
+    plt.show()
+    
+for src_word in ['roi', 'élect', 'livre', 'chanson', 'sept']:
+    translate(src_word, model)
 # %%
