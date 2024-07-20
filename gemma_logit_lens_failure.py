@@ -11,7 +11,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 #device = "cpu"
 
 def load_model(model_name='gemma-2b'):
-    return HookedTransformer.from_pretrained_no_processing(model_name, device=device, dtype=torch.bfloat16)
+    return HookedTransformer.from_pretrained_no_processing(model_name, device=device, dtype=torch.float16)
 
 def compute_logit_lens(model, prompt):
     with torch.no_grad():
@@ -55,7 +55,7 @@ def test_logit_lens(model, prompt, src_lang, src_word, dest_lang, dest_word):
 
 # %%
 if __name__ == "__main__":
-    model = load_model(model_name = "meta-llama/Llama-2-7b-hf")
+    model = load_model(model_name = "google/gemma-2-9b")
     src_word, src_lang = "chanson", "fr"
     dest_lang, dest_word = "de", "Lied"
     
