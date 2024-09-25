@@ -14,12 +14,81 @@ import seaborn as sns
 from scipy.stats import bootstrap
 import numpy as np
 import pandas as pd
-
+import torch
+import torch.nn.functional as F
+from .font import noto_sans, cjk
 plt.rcParams.update({
     'font.size': 16
 })
+from typing import Tuple, List, Optional, Dict, Callable, Iterable, Any, Union
+from jaxtyping import Int, Float
+from torch import Tensor
+import math
 
 plt_params = {'linewidth': 2.2}
+
+def plot_latents(logprobs : Int[Tensor, "latents num_layer"], 
+                   labels : Optional[List[str]] = None):
+    # Create a large figure
+    logprobs = logprobs / math.log(2) # convert to bits
+    assert len(logprobs.shape) == 2, "logprobs must have shape (batch, seq, vocab)"
+    assert len(logprobs) == len(labels), "logprobs and labels must have the same length"
+    plt.figure(figsize=(12, 6))
+
+    # Create the figure
+    plt.figure(figsize=(12, 6))
+    label = None
+    for i in range(len(logprobs)):
+        if labels is not None:
+            label = labels[i]
+        plt.plot(logprobs[i], label=label)
+
+    # Customize the plot
+    plt.title("Word Probabilities", fontproperties=cjk, fontsize=20)
+    plt.xlabel("Position", fontproperties=cjk, fontsize=16)
+    plt.ylabel("Probability", fontproperties=cjk, fontsize=16)
+
+    # Make legend font smaller and use the Noto Sans CJK font
+    plt.legend(prop={'size': 10, 'family': cjk.get_name()})
+    plt.axhline(y=-1, color='r', linestyle='--', label='Threshold = -2')
+    # Adjust layout and display
+    plt.tight_layout()
+    plt.grid(True)
+    #plt.ylim(-15.5, 0.5)
+    plt.show()
+
+def plot_logit_lens(logits: torch.Tensor, tokenizer, k=10, figsize=(10, 15)):
+    logprobs = F.log_softmax(logits, dim=-1)
+    top_logprobs, top_tokens = torch.topk(logprobs, k, dim=-1)
+    num_layers, _ = logprobs.shape
+    
+    plt.figure(figsize=figsize)
+    
+    # Convert top_logprobs to numpy (no need to transpose now)
+    imshow_data = top_logprobs.cpu().numpy()
+    
+    # Plot the heatmap with reversed y-axis
+    plt.imshow(imshow_data, aspect='auto', cmap='cividis', origin='upper')
+    plt.colorbar(label='Log Probability')
+    
+    # Add text annotations for tokens and their logprobs
+    for i in range(num_layers):
+        for j in range(k):
+            token = tokenizer.convert_ids_to_tokens(top_tokens[i, j].item())
+            logprob = top_logprobs[i, j].item()
+            plt.text(j, i, f"{token}\n{top_tokens[i, j]}\n{logprob:.2f}", 
+                     ha='center', va='center', color='black', fontsize=8,
+                     fontproperties=noto_sans)
+    
+    plt.title("Logit Lens Inspection", fontsize=16, fontproperties=noto_sans)
+    plt.ylabel("Layers", fontsize=14, fontproperties=noto_sans)
+    plt.xlabel("Top Tokens", fontsize=14, fontproperties=noto_sans)
+    plt.xticks(range(k), fontsize=12)
+    plt.yticks(range(0, num_layers, max(1, num_layers // 10)), 
+               range(num_layers, 0, -max(1, num_layers // 10) * -1), 
+               fontsize=12)
+    plt.tight_layout()
+    plt.show()
 
 
 def plot_ci_simple(data, ax, dim=1, **kwargs):

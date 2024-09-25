@@ -1,17 +1,18 @@
 # %%
 
-from sympy import use
 import torch
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
-from transformer_lens import HookedTransformer, utils
+# from transformers import GPT2LMHeadModel, GPT2Tokenizer
+# from transformer_lens import HookedTransformer, utils
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from tqdm import tqdm
-from utils.misc import plot_ci
+from utils.plot import plot_ci
+from src.kv_cache import run_with_kv_cache
+from src.datatypes import TokenizedSuffixesResult, LangIdx
 from torch import Tensor
-from jaxtyping import Float, Int
-from typing import List
+from typing import Tuple, List, Optional, Dict, Callable, Iterable, Any, Union
+from jaxtyping import Int, Float
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -19,10 +20,14 @@ import pandas as pd
 from matplotlib.colors import LogNorm
 import numpy as np
 from transformer_lens.past_key_value_caching import HookedTransformerKeyValueCache
-import src.prefix as prefix
+# import src.prefix as prefix
 from eindex import eindex
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import TensorDataset, DataLoader, Dataset
 # %%
+
+
+
+
 @torch.no_grad
 def run_with_shared_prefix(prefix_toks : Int[Tensor, "seq"], 
                            suffix_toks : Int[Tensor, "batch seq2"], 
@@ -49,63 +54,188 @@ def run_with_shared_prefix(prefix_toks : Int[Tensor, "seq"],
         output, cache = model.run_with_cache(suffix_toks, names_filter=hookpoint_names_filter, past_kv_cache=kv_cache)
     return output, cache
     
+    
 
+class MixedDataset(Dataset):
+    def __init__(self, tensors: Tuple[torch.Tensor, ...], tensor_lists: Tuple[List[torch.Tensor], ...]):
+        if not tensors and not tensor_lists:
+            raise ValueError("Both tuples are empty")
+        
+        self.tensors = tensors
+        self.tensor_lists = tensor_lists
+        
+        self.length = len(self.tensors[0]) if self.tensors else len(self.tensor_lists[0])
+        
+        # Ensure all data have the same length
+        if not all(len(t) == self.length for t in self.tensors):
+            raise ValueError("All tensors must have the same length")
+        if not all(len(l) == self.length for l in self.tensor_lists):
+            raise ValueError("All tensor lists must have the same length as tensors")
+
+    def __len__(self):
+        return self.length
+
+    def __getitem__(self, idx):
+        return (
+            tuple(tensor[idx] for tensor in self.tensors),
+            tuple(tensor_list[idx] for tensor_list in self.tensor_lists)
+        )
+
+    @staticmethod
+    def collate_fn(batch):
+        # Separate fixed-length tensors and variable-length tensor lists
+        fixed_tensors, var_tensor_lists = zip(*batch)
+        
+        # Handle fixed-length tensors
+        collated_fixed = tuple(torch.stack(items) for items in zip(*fixed_tensors))
+        
+        # Handle variable-length tensor lists
+        collated_var = tuple(list(items) for items in zip(*var_tensor_lists))
+        
+        return collated_fixed + collated_var
+    
+@torch.no_grad
+def logit_lens(prompt : Union[str, Int[Tensor, "seq"]],
+                model,
+                tuned_lens = None, 
+                intervention=None, **kwargs) -> Int[Tensor, "num_layers vocab"]:
+    
+    device = next(model.parameters()).device
+    
+    use_tuned_lens = kwargs.get('use_tuned_lens', False)
+    
+    #return_float = kwargs.get('return_float', False)
+    
+    fwd_hooks = [] if intervention is None else intervention.fwd_hooks(model, **kwargs)
+    all_post_resid = [f'blocks.{i}.hook_resid_post' for i in range(model.cfg.n_layers)]
+  
+    if isinstance(prompt, str):
+        prompt = model.tokenizer.encode(prompt, return_tensors="pt").to(device)
+        
+    with model.hooks(fwd_hooks = fwd_hooks):
+        logits, cache = model.run_with_cache(prompt, names_filter=all_post_resid)
+        
+    latents = torch.stack([resid[0, -1] for resid in cache.values()], dim=0) # (num_layers, d_model)
+    
+    if use_tuned_lens:
+        approx_logits = model.tuned_lens(latents)
+    else:
+        approx_logits = model.unembed(model.ln_final(latents))
+        
+    return approx_logits # (num_layers, vocab)
+    
 @torch.no_grad
 def logit_lens_batched(kv_cache : HookedTransformerKeyValueCache, 
-                       suffix_toks : Int[Tensor, "batch seq2"],
+                       suffix_toks : TokenizedSuffixesResult,
                        model,
-                       lang_idx : Int[Tensor, "lang batch"],
+                       lang_idx : LangIdx,
                        tuned_lens = None, 
                        intervention=None,
                        **kwargs):
     
     batch_size = kwargs.get('batch_size', 1)
-    src_lang = kwargs.get('src_lang', 'fr')
-    latent_lang = kwargs.get('latent_lang', 'en')
-    dest_lang = kwargs.get('dest_lang', 'zh')
     use_tuned_lens = kwargs.get('use_tuned_lens', False)
-    use_tuned_lens = kwargs.get('use_tuned_lens', False)
-    
-    device = next(model.parameters()).device
-    lang_idx = lang_idx.to(device)
-    suffix_toks = suffix_toks.to(device)
     
     #return_float = kwargs.get('return_float', False)
     
     fwd_hooks = [] if intervention is None else intervention.fwd_hooks(model, **kwargs)
     all_post_resid = [f'blocks.{i}.hook_resid_post' for i in range(model.cfg.n_layers)]
     
-    dataset = TensorDataset(suffix_toks, lang_idx)
-    dataloader = DataLoader(dataset, batch_size=batch_size)
-            
-    
-    # suffix_toks_batched = torch.split(suffix_toks, batch_size, dim=0)
-    
-    # latents = [act[:, -1, :] for act in cache.values()]
-    # latents = torch.stack(latents, dim=1) #(batch, num_layers, d_model)
+    dataset = MixedDataset(suffix_toks, lang_idx)
+    dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=MixedDataset.collate_fn)
 
     runner = tqdm(dataloader, total=len(suffix_toks), desc="Computing logits", position=0, leave=True)
     
-    all_probs = []
+    all_src_logprobs = []
+    all_latent_logprobs = []
+    all_dest_logprobs = []
     
-    for i, (toks, idx) in enumerate(runner):
-        cache = prefix.run_with_kv_cache(toks, kv_cache, model, fwd_hooks = fwd_hooks, names_filter = all_post_resid).cache    
+    for i, (toks, toks_mask, toks_idx, src_idx, latent_idx, dest_idx) in enumerate(runner):
+        _, cache = run_with_kv_cache(toks, kv_cache, model, fwd_hooks = fwd_hooks, names_filter = all_post_resid)
         
-        latents = [act[:, -1, :] for act in cache.values()] # List of (batch, d_model)
-        latents = torch.stack(latents, dim=1) # (batch, num_layers, d_model)
+        latents = torch.stack(tuple(cache.values()), dim=1) # (batch, num_layers, seq, d_model)
+        latents = eindex(latents, toks_idx, "batch num_layers [batch] d_model") # (batch, num_layers, d_model)
         
         if use_tuned_lens:
             approx_logits = model.tuned_lens(latents)
         else:
-            approx_logits = model.unembed(latents)
+            approx_logits = model.unembed(model.ln_final(latents))
             
-        probs = torch.softmax(approx_logits, dim=-1)
+        logprobs = torch.log_softmax(approx_logits, dim=-1) # (batch, num_layers, vocab)
         
-        probs = eindex(probs, idx, "bs n_layer [bs lang] -> lang n_layer bs")
-        all_probs.append(probs)
+        
+        for batch, (src, latent, dest) in enumerate(zip(src_idx, latent_idx, dest_idx)):
+            src_logprobs = torch.logsumexp(logprobs[batch, :, src], dim=-1)  # (n_layers)
+            latent_logprobs = torch.logsumexp(logprobs[batch, :, latent], dim=-1)  # (n_layers)
+            dest_logprobs = torch.logsumexp(logprobs[batch, :, dest], dim=-1)  # (n_layers)
+            all_src_logprobs.append(src_logprobs)
+            all_latent_logprobs.append(latent_logprobs)
+            all_dest_logprobs.append(dest_logprobs)
+        
         runner.update(len(toks))
-    all_probs = torch.cat(all_probs, dim=-1)
-    return all_probs
+        
+    all_src_logprobs = torch.stack(all_src_logprobs, dim=0) #(bs, n)
+    all_latent_logprobs = torch.stack(all_latent_logprobs, dim=0) #(bs, n)
+    all_dest_logprobs = torch.stack(all_dest_logprobs, dim=0) #(bs, n)
+    return torch.stack([all_src_logprobs, all_latent_logprobs, all_dest_logprobs], dim=0) #(lang, bs, n)
+
+
+# @torch.no_grad
+# def logit_lens_batched(kv_cache : HookedTransformerKeyValueCache, 
+#                        suffix_toks : Int[Tensor, "batch seq2"],
+#                        model,
+#                        lang_idx : Int[Tensor, "lang batch"],
+#                        tuned_lens = None, 
+#                        intervention=None,
+#                        **kwargs):
+    
+#     batch_size = kwargs.get('batch_size', 1)
+#     src_lang = kwargs.get('src_lang', 'fr')
+#     latent_lang = kwargs.get('latent_lang', 'en')
+#     dest_lang = kwargs.get('dest_lang', 'zh')
+#     use_tuned_lens = kwargs.get('use_tuned_lens', False)
+#     use_tuned_lens = kwargs.get('use_tuned_lens', False)
+    
+#     device = next(model.parameters()).device
+#     lang_idx = lang_idx.to(device)
+#     suffix_toks = suffix_toks.to(device)
+    
+#     #return_float = kwargs.get('return_float', False)
+    
+#     fwd_hooks = [] if intervention is None else intervention.fwd_hooks(model, **kwargs)
+#     all_post_resid = [f'blocks.{i}.hook_resid_post' for i in range(model.cfg.n_layers)]
+    
+#     dataset = TensorDataset(suffix_toks, lang_idx)
+#     dataloader = DataLoader(dataset, batch_size=batch_size)
+            
+    
+#     # suffix_toks_batched = torch.split(suffix_toks, batch_size, dim=0)
+    
+#     # latents = [act[:, -1, :] for act in cache.values()]
+#     # latents = torch.stack(latents, dim=1) #(batch, num_layers, d_model)
+
+#     runner = tqdm(dataloader, total=len(suffix_toks), desc="Computing logits", position=0, leave=True)
+    
+#     all_probs = []
+    
+#     for i, (toks, idx) in enumerate(runner):
+#         cache = prefix.run_with_kv_cache(toks, kv_cache, model, fwd_hooks = fwd_hooks, names_filter = all_post_resid).cache    
+        
+#         latents = [act[:, -1, :] for act in cache.values()] # List of (batch, d_model)
+#         latents = torch.stack(latents, dim=1) # (batch, num_layers, d_model)
+        
+#         if use_tuned_lens:
+#             approx_logits = model.tuned_lens(latents)
+#         else:
+#             approx_logits = model.unembed(latents)
+            
+#         probs = torch.softmax(approx_logits, dim=-1)
+        
+#         probs = eindex(probs, idx, "bs n_layer [bs lang] -> lang n_layer bs")
+#         all_probs.append(probs)
+#         runner.update(len(toks))
+#     all_probs = torch.cat(all_probs, dim=-1)
+#     return all_probs
     
 # %%
 @torch.no_grad

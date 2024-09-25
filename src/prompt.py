@@ -2,7 +2,7 @@
 from .constants import LANG2NAME
 import torch
 from typing import List
-from collections import namedtuple
+from src.datatypes import TokenizedSuffixesResult
 
 def gen_prompt(src_words = None, 
                dest_words = None, 
@@ -54,14 +54,10 @@ def gen_common_suffixes(src_words,
         suffix = f'{src_space}{src_word}" {LANG2NAME[dest_lang]}: "'
         common_suffixes.append(suffix)
     return common_suffixes
-        
-TokenizedSuffixesResult = namedtuple('TokenizedSuffixesResult', 
-                                     ['input_ids', 'attention_mask', 'indices'], 
-                                     defaults=[None, None, None])
-        
 
-#TODO: test
-def tokenize_suffixes(suffixes : List[str], model):
+def raw_tokenize(suffixes : str | List[str], model):
+    if isinstance(suffixes, str):
+        suffixes = [suffixes]
     device = next(model.parameters()).device
     model.tokenizer.pad_token = model.tokenizer.eos_token
     if "Llama-2" in model.tokenizer.name_or_path:
@@ -184,7 +180,7 @@ def find_all_tokens(token_str: str, vocab, **kwargs):
 
 # if "Llama-2" in cfg.model_name:
 #     test_suffixes2 = ["🌍" + x for x in suffixes]
-#     raw_suffix_toks = tokenize_suffixes(test_suffixes2, model)
+#     raw_suffix_toks = raw_tokenize(test_suffixes2, model)
 #     space_token_id = model.tokenizer.convert_tokens_to_ids("▁")
 #     earth_id = model.tokenizer.convert_tokens_to_ids("🌍")
 #     #print(raw_suffix_toks)     
@@ -197,7 +193,7 @@ def find_all_tokens(token_str: str, vocab, **kwargs):
 #                                             attention_mask=new_attention_mask, 
 #                                             indices=new_idx)
 # else:
-#     suffix_toks = tokenize_suffixes(suffixes, model)
+#     suffix_toks = raw_tokenize(suffixes, model)
 
 
 

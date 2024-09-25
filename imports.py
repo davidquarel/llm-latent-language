@@ -6,7 +6,7 @@ import os, sys
 from tqdm.auto import tqdm
 from ast import literal_eval
 # === Typing Libraries ===
-from typing import Tuple, List, Optional, Dict, Callable, Iterable, Any
+from typing import Tuple, List, Optional, Dict, Callable, Iterable, Any, Union
 from jaxtyping import Int, Float
 from beartype import beartype
 

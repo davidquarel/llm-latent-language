@@ -71,7 +71,7 @@ def process_suffix_toks(suffix_toks, model):
         
 TokenizeSuffixesResult = namedtuple('TokenizeSuffixes', ['tokens', 'indices'])
 
-def tokenize_suffixes(suffixes : List[str], model):
+def raw_tokenize(suffixes : List[str], model):
     device = next(model.parameters()).device
     raw_suffix_toks, attention_mask = model.tokenizer(suffixes, 
                                                     add_special_tokens=False, 
@@ -80,7 +80,7 @@ def tokenize_suffixes(suffixes : List[str], model):
     attention_mask = attention_mask.to(device)
     good_idx = torch.ones(len(raw_suffix_toks), dtype=torch.bool, device=device)
     if torch.any(attention_mask == 0):
-        print("Warning: tokenize_suffixes - Attention mask has zeros")
+        print("Warning: raw_tokenize - Attention mask has zeros")
         # assume that most common number of tokens is correct
         # we only get more tokens if something screwed up and a chinese character was sampled
         # when it shouldn't have, so take the ids with shortest attention mask
@@ -106,7 +106,7 @@ def suffix_preamble(src_words, model, keep_idx, src_lang = None, dest_lang = Non
     prompt = gen_prompt(None, src_lang, dest_lang)
     kv_cache = gen_kv_cache(prompt, model)
     suffixes = gen_common_suffixes(src_words, src_lang, dest_lang)
-    suffix_toks, keep_idx = tokenize_suffixes(suffixes, model)
+    suffix_toks, keep_idx = raw_tokenize(suffixes, model)
     
     return SuffixPreambleReturn(kv_cache, suffix_toks, keep_idx)
 

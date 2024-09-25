@@ -3,7 +3,7 @@ from torch import Tensor
 import torch
 from jaxtyping import Int, Float
 from transformer_lens.hook_points import HookPoint
-from utils.misc import proj
+from src.llm import proj
 from beartype import beartype
 import inspect
 import re
