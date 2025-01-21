@@ -11,7 +11,7 @@ from src.llm import suffix_preamble, run, measure_performance
 from src.intervention import Intervention
 from utils.plot import plot_ci_simple
 from utils.config_argparse import try_parse_args
-from src.constants import LANG2NAME, LANG_BANK
+from src.constants import LANG_TO_NAME, LANG_BANK
 from eindex import eindex
 from collections import namedtuple
 import warnings

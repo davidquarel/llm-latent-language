@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from src.prompt import gen_prompt, gen_common_suffixes, find_all_tokens
 from src.kv_cache import gen_kv_cache, run_with_kv_cache
 from src.intervention import Intervention
-from src.constants import LANG2NAME, LANG_BANK
+from src.constants import LANG_TO_NAME, LANG_BANK
 from src.llm import safe_tokenize
 from utils.data import gen_lang_ids, results_dict_to_csv
 

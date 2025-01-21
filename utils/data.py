@@ -77,6 +77,7 @@ def gen_ids(df, model, lang):
         dest_ids = dest_ids[dest_ids != space_tok]
         dest_ids = torch.unique(dest_ids)
         all_ids.append(dest_ids)
+    pad_value = model.tokenizer.unk_token_id
     all_ids = torch.nn.utils.rnn.pad_sequence(all_ids, batch_first=True, padding_value=model.tokenizer.unk_token_id)
     return all_ids
 

@@ -57,18 +57,19 @@ def gen_kv_cache(prompt : str | Int[Tensor, "batch seq"] | Int[Tensor, "seq"],
 RunWithKVCacheResult = namedtuple('RunWithKVCacheResult', ['logits', 'cache'], defaults=[None])
     
 def run_with_kv_cache(tokens : Int[Tensor, "batch seq"],
-                    kv_cache : HookedTransformerKeyValueCache,
+                    past_kv_cache : HookedTransformerKeyValueCache,
                     model : HookedTransformer,
                     fwd_hooks : List[Callable] = [],
-                    names_filter : List[str] = [],
+                    **kwargs
 ) -> Tuple[Tensor, Tensor]:
-    device = next(model.parameters()).device
-    kv_cache.freeze()
-    broadcast_kv_cache(kv_cache, len(tokens))
-    tokens = tokens.to(device)
+
+    past_kv_cache.freeze()
+    broadcast_kv_cache(past_kv_cache, len(tokens))
     
     with model.hooks(fwd_hooks = fwd_hooks):
-        logits, cache = model.run_with_cache(tokens, past_kv_cache=kv_cache, names_filter=names_filter)
+        logits, cache = model.run_with_cache(tokens, 
+                                             past_kv_cache=past_kv_cache,
+                                                **kwargs)
         
     return RunWithKVCacheResult(logits=logits, cache=cache)
     

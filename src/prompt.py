@@ -1,5 +1,5 @@
 # %%
-from .constants import LANG2NAME, LANG_BANK
+from .constants import LANG_TO_NAME, LANG_BANK, LANGS_NO_SPACE
 import torch
 from typing import List
 from collections import namedtuple
@@ -40,10 +40,10 @@ def gen_prompt(src_words = None,
 
     prompt = ""
     for i in range(min(num_examples, len(src_words))):
-        prompt += f'{LANG2NAME[src_lang]}: "{src_space}{src_words[i]}" - {LANG2NAME[dest_lang]}: "{dest_space}{dest_words[i]}"\n'
+        prompt += f'{LANG_TO_NAME[src_lang]}: "{src_space}{src_words[i]}" - {LANG_TO_NAME[dest_lang]}: "{dest_space}{dest_words[i]}"\n'
 
     # Add the last example without the destination translation
-    prompt += f'{LANG2NAME[src_lang]}: "'
+    prompt += f'{LANG_TO_NAME[src_lang]}: "'
 
     return prompt
 # %%
@@ -54,11 +54,11 @@ def gen_common_suffixes(src_words,
     assert src_lang is not None, "Source language must be provided"
     assert dest_lang is not None, "Destination language must be provided"
     common_suffixes = []
-    src_space = " " if src_lang != 'zh' else ""
+    src_space = "" if src_lang in LANGS_NO_SPACE else " "
     
     for src_word in src_words:
         src_word = src_word.split('▁')[-1] # Remove leading space token if present
-        suffix = f'{src_space}{src_word}" {LANG2NAME[dest_lang]}: "'
+        suffix = f'{src_space}{src_word}" {LANG_TO_NAME[dest_lang]}: "'
         common_suffixes.append(suffix)
     return common_suffixes
 
