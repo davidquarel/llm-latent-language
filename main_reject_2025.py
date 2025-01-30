@@ -42,7 +42,7 @@ from src.prompt import token_prefixes
 @dataclass
 class Config:
     seed: int = 42
-    model_name: str = "meta-llama/Meta-Llama-3-8B"
+    model_name: str = "meta-llama/Llama-2-7b-hf"
     # single_token_only: bool = False
     # multi_token_only: bool = False
     out_dir: str = './out_iclr'
@@ -192,7 +192,7 @@ assert probs_on_answer.shape == all_answer_ids.shape
 mask = all_answer_ids == tokenizer.pad_token_id
 probs_on_answer[mask] = 0  
 probs_on_answer = probs_on_answer.sum(dim=-1) #average over all tokens
-
+print(probs_on_answer)
 
 
 # %%

@@ -40,4 +40,6 @@ LANG_BANK = {
 
 MODELS_TOK_LEADING_SPACE = ["Llama-2-7b-hf", "Llama-2-7b", "Llama-2-7b-llama", "Llama-2-7b-llama-hf"]
 
-LANGS_NO_SPACE = ['zh', 'ja'] #languages that do not have spaces between words
+LANGS_NO_SPACE = ['zh', 'ja', 'ko'] #languages that do not have spaces between words
+
+LANGS = ['en', 'zh', 'fr', 'de', 'ru']

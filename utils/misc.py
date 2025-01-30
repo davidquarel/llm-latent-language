@@ -52,3 +52,34 @@ def ci(data, dim=0, debug = False):
     if debug:
         print(f"{mean} ± {sem95}")
     return mean, sem95
+
+import numpy as np
+from scipy import stats
+
+def wilson_ci(correct, total, confidence=0.95):
+    """
+    Calculate Wilson score interval, which is more reliable than normal approximation,
+    especially for extreme proportions or small sample sizes.
+    
+    Parameters:
+    correct (int): Number of correct predictions
+    total (int): Total number of predictions
+    confidence (float): Confidence level (default: 0.95 for 95% CI)
+    
+    Returns:
+    tuple: (accuracy, lower_bound, upper_bound)
+    """
+    accuracy = correct / total
+    
+    # Critical value for the desired confidence level
+    z = stats.norm.ppf((1 + confidence) / 2)
+    
+    # Calculate components of Wilson score interval
+    denominator = 1 + z**2/total
+    center_adjusted_probability = (accuracy + z**2/(2*total))/denominator
+    adjusted_standard_error = z * np.sqrt((accuracy*(1 - accuracy) + z**2/(4*total))/total)/denominator
+    
+    lower_bound = max(0, center_adjusted_probability - adjusted_standard_error)
+    upper_bound = min(1, center_adjusted_probability + adjusted_standard_error)
+    
+    return accuracy, lower_bound, upper_bound

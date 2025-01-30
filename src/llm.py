@@ -4,23 +4,12 @@ from typing import List
 from jaxtyping import Float, Int
 from torch import Tensor
 import torch
-from utils.misc import printd
 from typing import List, Tuple, Callable
-from jaxtyping import Int
-from dataclasses import dataclass
-from typing import Optional
 from tqdm.auto import tqdm
-from transformer_lens import HookedTransformerKeyValueCache, HookedTransformer
 from transformers import AutoTokenizer
 from torch import Tensor
-from torch.utils.data import DataLoader, TensorDataset
-from collections import namedtuple
-from einops import rearrange
 import warnings
-from .constants import LANG_TO_NAME
-from .prompt import gen_prompt, gen_common_suffixes
-from .kv_cache import gen_kv_cache, run_with_kv_cache, batched_predict_next
-
+from .schema import TokenizedSuffixesResult
 # %%
 
 def proj(x : Float[Tensor, "batch dmodel"], 
@@ -152,20 +141,6 @@ def entropy(probas):
 
 # def rejection(x : Float[Tensor, "batch dmodel"], Y : Float[Tensor, "numvec dmodel"]) -> Float[Tensor, "batch dmodel"]:
 #     return x - proj(x, Y)
-
-@dataclass
-class TokenizedSuffixesResult:
-    input_ids: Optional[torch.Tensor] = None
-    attention_mask: Optional[torch.Tensor] = None
-    indices: Optional[torch.Tensor] = None
-
-    def to(self, *args, **kwargs):
-        """Move all tensor attributes to the specified device/dtype."""
-        return TokenizedSuffixesResult(
-            input_ids=self.input_ids.to(*args, **kwargs) if self.input_ids is not None else None,
-            attention_mask=self.attention_mask.to(*args, **kwargs) if self.attention_mask is not None else None,
-            indices=self.indices.to(*args, **kwargs) if self.indices is not None else None
-        )
         
 
 #TODO: test
@@ -218,50 +193,6 @@ def safe_tokenize(suffixes : List[str] | str,
         out = out.to(device)
 
     return out
-
-# def safe_tokenize(suffixes : List[str] | str, 
-#                   model : HookedTransformer
-# ) -> TokenizedSuffixesResult:
-#     device = next(model.parameters()).device
-#     model.tokenizer.pad_token = model.tokenizer.eos_token
-    
-#     if isinstance(suffixes, str):    
-#         suffixes = [suffixes]
-    
-#     if "Llama-2" in model.tokenizer.name_or_path:
-#         suffixes = ["🌍" + x for x in suffixes]
-#         space_token_id = model.tokenizer.convert_tokens_to_ids("▁")
-#         earth_token_id = model.tokenizer.convert_tokens_to_ids("🌍")
-        
-#         suffix_tokens, attn_mask = model.tokenizer(suffixes,
-#                                                 add_special_tokens=False,
-#                                                 return_tensors="pt",
-#                                                 padding=True).values()
-        
-#         assert torch.all(suffix_tokens[:, 0] == space_token_id), "llama2 has leading space token"
-#         assert torch.all(suffix_tokens[:, 1] == earth_token_id), "llama2 single token for 🌍"
-        
-#         suffix_tokens = suffix_tokens[:, 2:]
-#         attn_mask = attn_mask[:, 2:]
-#         idx = attn_mask.sum(dim=-1) - 1 #-1, and another two more: one for the space token, one for the 🌍 token
-    
-#     else: # models that do not add leading spaces
-#         suffix_tokens, attn_mask = model.tokenizer(suffixes,
-#                                                 add_special_tokens=False,
-#                                                 return_tensors="pt",
-#                                                 padding=True).values()
-#         idx = attn_mask.sum(dim=-1) - 1
-        
-#     assert torch.all(idx >= 0), "Attention mask has zeros, empty suffixes"
-#     suffix_tokens = suffix_tokens.to(device)
-#     attn_mask = attn_mask.to(device)
-#     idx = idx.to(device)
-    
-#     return TokenizedSuffixesResult(
-#         input_ids=suffix_tokens,
-#         attention_mask=attn_mask,
-#         indices=idx
-#     )
 
 
 
