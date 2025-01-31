@@ -2,7 +2,7 @@ import pandas as pd
 import os
 from .constants import LANGS
 
-def merge_all(data_path):
+def merge_all(data_path, how='inner'):
     df = pd.DataFrame()
     for lang in ['fr', 'de', 'ru', 'zh', 'ko']:
         path = os.path.join(data_path, lang, "clean.csv")
@@ -11,7 +11,7 @@ def merge_all(data_path):
         if df.empty:
             df = new_df
         else:
-            df = df.merge(new_df, on='word_original', how='inner')
+            df = df.merge(new_df, on='word_original', how=how)
     df = df.rename(columns={'word_original': 'en'})
     return df
 
