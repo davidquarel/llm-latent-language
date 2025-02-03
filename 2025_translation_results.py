@@ -16,7 +16,7 @@ from src.prompt import gen_prompt, gen_common_suffixes, get_answer_tensor2, get_
 from src.kv_cache import gen_kv_cache, run_with_kv_cache
 from src.intervention import Intervention
 from src.constants import LANGS, WORD_LIST
-from src.llm import safe_tokenize, num_correct, loss_on_answers
+from src.llm import safe_tokenize
 from utils.data import gen_lang_ids, results_dict_to_csv
 
 from utils.plot import plot_ci_simple
@@ -70,7 +70,7 @@ class Config:
     src_lang : str = None
     dest_lang : str = None
     latent_lang : str = 'en'
-    devices : Optional[str] = "1,2"
+    devices : Optional[str] = "0,3"
     out : Optional[str] = "out_icml_2025"
     token_add_capitalization : bool = True
     token_add_prefixes : bool = True
@@ -124,8 +124,8 @@ def loss_on_answer(logits, answers, padding_id = -1) -> Float[Tensor, "batch"]:
     return -probs_on_answer(logits, answers, padding_id, log_probs=True)
 
 def run_translations():
-
-    output_results = pd.DataFrame(columns=['src_lang', 'dest_lang', 'latent_lang', 'avg_prob', 'sem95_error', 'acc'])
+    LANGS = ['fr', 'de', 'ru', 'zh', 'es','en']
+    output_results = []
 
     print("Computing translation probabilities for each language pair")
 
@@ -166,7 +166,22 @@ def run_translations():
 
         acc = correct / answers.shape[0]
         print(f"{src} -> {dest} Translated {correct}/{answers.shape[0]} correctly. Accuracy: {acc:.2%} Loss: {mean_loss:.2f} Probs {mean_probs:.2f} ± {ci95:.2f}")
-        output_results = output_results.append({'src_lang': src, 'dest_lang': dest, 'latent_lang': None, 'avg_prob': mean_probs, 'sem95_error': ci95, 'acc': acc}, ignore_index=True)
-
+        output_results.append({'src_lang': src, 
+                                'dest_lang': dest, 
+                                'latent_lang': None, 
+                                'avg_prob': mean_probs, 
+                                'sem95_error': ci95, 
+                                'acc': acc})
+    output_results = pd.DataFrame(output_results)
+    return output_results
 model_basename = cfg.model_name.split('/')[-1]
 out_path = os.path.join(cfg.out, model_basename, f"translation_no_interv_latent.csv")
+
+if __name__ == "__main__":
+
+    output_results = run_translations()
+
+    out_path = os.path.join(cfg.out, model_basename, f"translation_no_interv_latent.csv")
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    output_results.to_csv(out_path, index=False)
+# %%
