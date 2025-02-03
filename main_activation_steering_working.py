@@ -70,11 +70,6 @@ class Config:
     latent_lang : str = 'en'
     devices : Optional[str] = "0"
 
-    token_add_capitalization : bool = True
-    token_add_prefixes : bool = True
-    token_add_spaces : bool = True
-    token_utf8_byte : bool = True
-
 cfg = Config()
 cfg = try_parse_args(cfg)
 cfg_dict = asdict(cfg)
@@ -326,19 +321,6 @@ def replace(
     # modify resid (can be inplace)
     return resid
 
-shift_hooks = []
-for n in range(11, 29):
-    name = f"blocks.{n}.hook_resid_post"
-    S_del = get_subspace(en_word_alt)
-    _, c = proj(interv_cache[name][:, -1], S_del, return_coeff=True)
-    splice = c * S_del
-    hook = lambda resid, hook: replace(resid,hook, en_word, splice, scale=0.11)
-    shift_hooks.append((name, hook))
-
-with model.hooks(fwd_hooks=shift_hooks):
-    shift_logits, shift_cache = model.run_with_cache(clean_prompt, names_filter=all_resid)
-logit_lens(shift_logits, shift_cache, answers, axes[1,0], title=f"clean shift {en_word} {src} -> {dest}, {en_word}")
-
 
 
             # start, end = 13, 18
@@ -361,33 +343,7 @@ logit_lens(shift_logits, shift_cache, answers, axes[1,0], title=f"clean shift {e
             # logit_lens(steered_logits, steered_cache, answers, axes[i,j], title=f"reject {en_word} {src} -> {dest}, {en_word}, prob ")
             # axes[i,j].grid()
 # %%
-def get_concept_strength(prompt_clean, prompt_target, en_word_target, layers):
-    # Get clean prompt projections
-    _, cache_clean = model.run_with_cache(prompt_clean)
-    clean_projections = {
-        layer: proj(cache_clean[f"blocks.{layer}.hook_resid_post"][:, -1], 
-                   get_subspace(en_word_target))
-        for layer in layers
-    }
-    
-    # Get target concept projections
-    _, cache_target = model.run_with_cache(prompt_target) 
-    target_projections = {
-        layer: proj(cache_target[f"blocks.{layer}.hook_resid_post"][:, -1],
-                   get_subspace(en_word_target))
-        for layer in layers
-    }
-    
-    # Calculate layer-wise scaling factors
-    strength_factors = {
-        layer: (target_projections[layer] - clean_projections[layer]).norm(p=2, dim=-1)
-                / clean_projections[layer].norm(p=2, dim=-1)
-        for layer in layers
-    }
-    
-    return strength_factors
 
-strength_factors = get_concept_strength(clean_prompt, interv_prompt, en_word_alt, range(model.cfg.n_layers))
 # %%
 
 def print_topk_tokens(
@@ -456,6 +412,44 @@ def concept_steering_hook(
 
 from functools import partial
 
+
+
+fig, axes = plt.subplots(2, 2, figsize=(20, 12))
+
+all_resid = [f"blocks.{x}.hook_resid_post" for x in range(model.cfg.n_layers)]
+
+clean_logits, clean_cache = model.run_with_cache(clean_prompt, names_filter=all_resid)
+logit_lens(clean_logits, clean_cache, answers, axes[0,0], title=f"clean {src} -> {dest}, {en_word}")
+
+interv_logits, interv_cache = model.run_with_cache(interv_prompt, names_filter=all_resid)
+logit_lens(interv_logits, interv_cache, answers, axes[0,1], title=f"clean {src_s} -> {dest_s}, {en_word_alt}")
+
+def get_concept_strength(prompt_clean, prompt_target, en_word_target, layers):
+    # Get clean prompt projections
+    _, cache_clean = model.run_with_cache(prompt_clean)
+    clean_projections = {
+        layer: proj(cache_clean[f"blocks.{layer}.hook_resid_post"][:, -1], 
+                   get_subspace(en_word_target))
+        for layer in layers
+    }
+    
+    # Get target concept projections
+    _, cache_target = model.run_with_cache(prompt_target) 
+    target_projections = {
+        layer: proj(cache_target[f"blocks.{layer}.hook_resid_post"][:, -1],
+                   get_subspace(en_word_target))
+        for layer in layers
+    }
+    
+    # Calculate layer-wise scaling factors
+    strength_factors = {
+        layer: (target_projections[layer] - clean_projections[layer]).norm(p=2, dim=-1)
+                / clean_projections[layer].norm(p=2, dim=-1)
+        for layer in layers
+    }
+    
+    return strength_factors
+
 # Calculate optimal strength
 layers = range(12, 20)
 strength_factors = get_concept_strength(clean_prompt, interv_prompt, "foot", layers)
@@ -472,21 +466,28 @@ strength_hooks = [
 # Run model with intervention
 
 
-fig, axes = plt.subplots(2, 2, figsize=(20, 12))
 
-all_resid = [f"blocks.{x}.hook_resid_post" for x in range(model.cfg.n_layers)]
+shift_hooks = []
+for n in range(12, 20):
+    name = f"blocks.{n}.hook_resid_post"
+    S_del = get_subspace(en_word_alt)
+    _, c = proj(interv_cache[name][:, -1], S_del, return_coeff=True)
+    splice = c * S_del
+    hook = lambda resid, hook: replace(resid,hook, en_word, splice, scale=0.11)
+    shift_hooks.append((name, hook))
 
-clean_logits, clean_cache = model.run_with_cache(clean_prompt, names_filter=all_resid)
-logit_lens(clean_logits, clean_cache, answers, axes[0,0], title=f"clean {src} -> {dest}, {en_word}")
+# with model.hooks(fwd_hooks=shift_hooks):
+#     shift_logits, shift_cache = model.run_with_cache(clean_prompt, names_filter=all_resid)
+# logit_lens(shift_logits, shift_cache, answers, axes[1,0], title=f"clean shift {en_word} {src} -> {dest}, {en_word}")
 
-interv_logits, interv_cache = model.run_with_cache(interv_prompt, names_filter=all_resid)
-logit_lens(interv_logits, interv_cache, answers, axes[0,1], title=f"clean {src_s} -> {dest_s}, {en_word_alt}")
+strength_factors = get_concept_strength(clean_prompt, interv_prompt, en_word_alt, range(model.cfg.n_layers))
+
 
 with model.hooks(fwd_hooks=strength_hooks):
     logits_steered, cache_steered = model.run_with_cache(clean_prompt, names_filter=all_resid)
 logit_lens(logits_steered, cache_steered, answers, axes[1,0], title=f"steer {src} -> {dest}, {en_word}")
 
-#print_topk_tokens(clean_logits[:, -1], tokenizer, title="Clean top tokens")
-#print_topk_tokens(interv_logits[:, -1], tokenizer, title="Intervention top tokens")
+print_topk_tokens(clean_logits[:, -1], tokenizer, title="Clean top tokens")
+print_topk_tokens(interv_logits[:, -1], tokenizer, title="Intervention top tokens")
 print_topk_tokens(logits_steered[:, -1], tokenizer, title="Steered top tokens")
 # %%

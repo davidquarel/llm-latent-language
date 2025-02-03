@@ -12,17 +12,27 @@ import warnings
 from .schema import TokenizedSuffixesResult
 # %%
 
-def proj(x : Float[Tensor, "batch dmodel"], 
-         Y : Float[Tensor, "numvec dmodel"],
-         tol : float = 1e-8 
+def proj(x: Float[Tensor, "batch dmodel"],
+         Y: Float[Tensor, "numvec dmodel"],
+         remove_zero_rows: bool = False,
+         return_coeff : bool = False,
+         tol: float = 1e-8
 ) -> Float[Tensor, "... dmodel"]:
+    # Store original dtype
+    original_dtype = x.dtype
+    
+    # Cast to float32 for computation
+    x = x.to(torch.float32)
+    Y = Y.to(torch.float32)
+    
     # Computes the projection of x onto the subspace spanned by the columns of Y
     Y = ensure_3d(Y)
-        
-    zero_rows = torch.all(Y==0, dim=-1)
-    Y = Y[~zero_rows]
-        
-    Y = Y.mT #(dmodel, numvec) #require column vectors
+    
+    if remove_zero_rows:
+        zero_rows = torch.all(Y==0, dim=-1)
+        Y = Y[~zero_rows]
+    
+    Y = Y.mT  # (dmodel, numvec) #require column vectors
     
     # Solve the linear system (Y^T @ Y) @ c = Y^T @ x
     # c is the coefficients of the projection of x onto the subspace spanned by the columns of Y
@@ -30,9 +40,15 @@ def proj(x : Float[Tensor, "batch dmodel"],
     if x.ndim == 1:
         x = x.unsqueeze(0)
     
-    c = torch.linalg.solve(Y.mT  @ Y, (x @ Y).mT)    
-    proj_x = (Y @ c).mT 
-    return proj_x.squeeze()
+    c = torch.linalg.solve(Y.mT @ Y, (x @ Y).mT)
+    proj_x = (Y @ c).mT
+    
+    # Cast back to original dtype before returning
+    if return_coeff:
+        return proj_x.squeeze().to(original_dtype), c.squeeze().to(original_dtype)
+    else:
+        return proj_x.squeeze().to(original_dtype)
+
 
 def proj_batched_slow(x : Float[Tensor, "batch dmodel"], 
              Y : Float[Tensor, "batch numvec dmodel"], 
@@ -68,7 +84,8 @@ def proj_batched(x : Float[Tensor, "batch dmodel"],
         epsilon: Small constant for regularization to handle rank-deficient matrices
 
     Returns:
-        proj_x: Tensor of shape (batch, dmodel), the projection of x onto the subspace spanned by Y
+        proj_x: Tensor of shape (batch, dmodel),
+        proj_x[b] is the projection of x[b] onto the subspace spanned by the rows of Y[b]
     """
     # x: (B, dmodel)
     # Y: (B, n, dmodel)
@@ -107,29 +124,7 @@ def ensure_3d(x):
     new_shape = (1,) * dims_to_add + x.shape
     return x.view(*new_shape)
 
-def proj(x : Float[Tensor, "batch dmodel"], 
-         Y : Float[Tensor, "batch numvec dmodel"],
-         remove_zero_rows : bool = False,
-         tol : float = 1e-8 
-) -> Float[Tensor, "... dmodel"]:
-    # Computes the projection of x onto the subspace spanned by the columns of Y
-    Y = ensure_3d(Y)
-        
-    if remove_zero_rows:
-        mask = torch.all(Y==0, dim=-1)
-        Y = Y[mask]
-        
-    Y = Y.mT #(batch, dmodel, numvec) #require column vectors
-    
-    # Solve the linear system (Y^T @ Y) @ c = Y^T @ x
-    # c is the coefficients of the projection of x onto the subspace spanned by the columns of Y
-    # so the projection of x onto the subspace spanned by the columns of Y is Y @ c
-    if x.ndim == 1:
-        x = x.unsqueeze(0)
-    
-    c = torch.linalg.solve(Y.mT  @ Y, (x @ Y).mT)    
-    proj_x = (Y @ c).mT 
-    return proj_x.squeeze()
+
 
 
 # %%
