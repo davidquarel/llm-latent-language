@@ -155,11 +155,14 @@ for (src, dest) in tqdm(lang_pairs):
 
     probs = probs_on_answer(logits, answers, padding_id = tokenizer.pad_token_id, log_probs=False)
     mean_loss = -torch.log(probs).mean().item()
+    
+    mean_probs = probs.mean().item()
     ci95 = 1.96 * probs.std().item() / np.sqrt(probs.shape[0])
 
+
     acc = correct / answers.shape[0]
-    print(f"{src} -> {dest} Translated {correct}/{answers.shape[0]} correctly. Accuracy: {acc:.2%} Loss: {mean_loss:.2f} ± {ci95:.2f}")
-    acc_dict[(src, dest)] = (correct, answers.shape[0], acc, mean_loss, ci95)
+    print(f"{src} -> {dest} Translated {correct}/{answers.shape[0]} correctly. Accuracy: {acc:.2%} Loss: {mean_loss:.2f} Probs {mean_prosb:.2f} ± {ci95:.2f}")
+    output_results = output_results.append({'src_lang': src, 'dest_lang': dest, 'latent_lang': , 'avg_prob': mean_probs, 'sem95_error': ci95, 'acc': acc}, ignore_index=True)
 # %%
 print(acc_dict)
 
