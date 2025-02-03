@@ -8,14 +8,15 @@ try:
 except:
     pass
 # %%
+from torch._tensor import Tensor
 from imports import *
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # ==== Custom Libraries ====
 from src.prompt import gen_prompt, gen_common_suffixes, get_answer_tensor2, get_valid_answer
 from src.kv_cache import gen_kv_cache, run_with_kv_cache
 from src.intervention import Intervention
-from src.constants import LANG_TO_NAME, LANG_BANK, LANGS_NO_SPACE, LANGS
-from src.llm import safe_tokenize
+from src.constants import LANGS, WORD_LIST
+from src.llm import safe_tokenize, num_correct, loss_on_answers
 from utils.data import gen_lang_ids, results_dict_to_csv
 
 from utils.plot import plot_ci_simple
@@ -68,7 +69,7 @@ class Config:
     dest_lang : str = None
     latent_lang : str = 'en'
     devices : Optional[str] = "1,2"
-
+    out : Optional[str] = "out_icml_2025"
     token_add_capitalization : bool = True
     token_add_prefixes : bool = True
     token_add_spaces : bool = True
@@ -105,38 +106,34 @@ if 'loaded_model' not in globals():
 print("Devices:", cfg.devices)
 
 # %%
-
-def num_correct(logits, answers):
-    preds = logits.argmax(dim=-1, keepdim=True).to(answers.device)
-    correct = torch.any(preds == answers, dim=-1).sum()
-    return correct.item()
-
-def loss_on_answer(logits, answers, padding_id = -1):
-    probs = torch.softmax(logits, dim=-1).float().cpu()
-    probs_on_answer = eindex(probs, answers.cpu(), "batch [batch seq] -> batch seq")
-    probs_on_answer[answers == padding_id] = 0
-    probs_on_answer = probs_on_answer.sum(dim=-1) # (batch,) sum over valid answers
-    return -torch.log(probs_on_answer)
+from itertools import combinations, product, permutations
 
 
-from itertools import combinations, product
+lang_pairs = list(permutations(LANGS, 2))
 
-word_list = ['cloud', 'mountain', 'moon', 'flower']
+output_results = pd.DataFrame(columns=['src_lang', 'dest_lang', 'latent_lang', 'avg_prob', 'sem95_error', 'acc'])
 
-lang_pairs = list(product(LANGS, repeat=2))
+def probs_on_answer(logits, answers, padding_id = -1, log_probs=False):
+    softmax_fn = torch.log_softmax if log_probs else torch.softmax
+    sum_fn = torch.logsumexp if log_probs else torch.sum
+    zero = float('-inf') if log_probs else 0
+
+    probs_est = softmax_fn(logits, dim=-1) # (batch, vocab)
+    on_answer = eindex(probs_est, answers, "batch [batch seq] -> batch seq")
+    on_answer[answers == tokenizer.pad_token_id] = zero
+    on_answer = sum_fn(on_answer, dim=-1) # (batch,)
+    return on_answer
+
+def loss_on_answer(logits, answers, padding_id = -1) -> Float[Tensor, "batch"]:
+    return -probs_on_answer(logits, answers, padding_id, log_probs=True)
 
 
-acc_dict = {}
 
-
-def fetch_df(src, dest, cfg):
-    if cfg.dataset_path 
-
-
+print("Computing translation probabilities for each language pair")
+runner = tqdm(lang_pairs)
 for (src, dest) in tqdm(lang_pairs):
     df = wendler.load_data("data_wendler/langs", SimpleNamespace(src_lang=src, dest_lang=dest))
-    print(f"Translating {src} -> {dest}")
-    mask = df['en'].isin(word_list)
+    mask = df['en'].isin(WORD_LIST)
     prompt_df, suffix_df = df[mask], df[~mask]
     
     prompt = gen_prompt(prompt_df, src, dest)
@@ -152,11 +149,13 @@ for (src, dest) in tqdm(lang_pairs):
                                   model, 
                                   mini_batch_size = 32,
                                   last_seq = True)
-    
-    correct = num_correct(logits, answers)
-    loss_per_answer = loss_on_answer(logits, answers, padding_id = tokenizer.pad_token_id)
-    mean_loss = loss_per_answer.mean().item()
-    ci95 = 1.96 * loss_per_answer.std().item() / np.sqrt(loss_per_answer.shape[0])
+
+    preds = logits.argmax(dim=-1, keepdim=True).to(answers.device)
+    correct = torch.any(preds == answers, dim=-1).sum().item()
+
+    probs = probs_on_answer(logits, answers, padding_id = tokenizer.pad_token_id, log_probs=False)
+    mean_loss = -torch.log(probs).mean().item()
+    ci95 = 1.96 * probs.std().item() / np.sqrt(probs.shape[0])
 
     acc = correct / answers.shape[0]
     print(f"{src} -> {dest} Translated {correct}/{answers.shape[0]} correctly. Accuracy: {acc:.2%} Loss: {mean_loss:.2f} ± {ci95:.2f}")
@@ -186,7 +185,7 @@ plt.show()
 #names_filter = ["hook_embed"] + [f"block.{x}.hook_resid_post" for x in range(model.cfg.n_layers)]
 src, dest = 'fr', 'de'
 df = wendler.load_data("data_wendler/langs", SimpleNamespace(src_lang=src, dest_lang=dest))
-mask = df['en'].isin(word_list)
+mask = df['en'].isin(WORD_LIST)
 prompt_df, suffix_df = df[mask], df[~mask]
 
 prompt = gen_prompt(prompt_df, src, dest)
@@ -207,18 +206,12 @@ answers_en = get_answer_tensor2(suffix_df['en'], tokenizer, vocab, cfg, padding_
 
 # %%
 
+
+
 def logit_lens_layer(resid, answers, log_probs = False):
     logit_est = model.unembed(model.ln_final(resid.to(model.W_U.device))) # (batch, vocab)
-
-    softmax_fn = torch.log_softmax if log_probs else torch.softmax
-    sum_fn = torch.logsumexp if log_probs else torch.sum
-    zero = float('-inf') if log_probs else 0
-
-    probs_est = softmax_fn(logit_est, dim=-1) # (batch, vocab)
-    on_answer = eindex(probs_est, answers, "batch [batch seq] -> batch seq")
-    on_answer[answers == tokenizer.pad_token_id] = zero
-    on_answer = sum_fn(on_answer, dim=-1) # (batch,)
-    return on_answer
+    return probs_on_answer(logit_est, answers, log_probs = log_probs)
+   
 
 def logit_lens(cache, answers):
     probs_per_layer = [logit_lens_layer(resid, answers) for resid in cache.values()]

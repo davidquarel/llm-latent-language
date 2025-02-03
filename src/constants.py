@@ -43,3 +43,5 @@ MODELS_TOK_LEADING_SPACE = ["Llama-2-7b-hf", "Llama-2-7b", "Llama-2-7b-llama", "
 LANGS_NO_SPACE = ['zh', 'ja', 'ko'] #languages that do not have spaces between words
 
 LANGS = ['en', 'zh', 'fr', 'de', 'ru']
+
+WORD_LIST = ['cloud', 'mountain', 'moon', 'flower']
