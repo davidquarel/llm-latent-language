@@ -89,6 +89,13 @@ def proj_batched(x : Float[Tensor, "batch dmodel"],
     """
     # x: (B, dmodel)
     # Y: (B, n, dmodel)
+    original_dtype = x.dtype
+    
+    # Cast to float32 for computation
+    x = x.to(torch.float32)
+    Y = Y.to(torch.float32)
+
+
     B, n, dmodel = Y.shape
 
     # Transpose Y to shape (B, dmodel, n)
@@ -117,7 +124,7 @@ def proj_batched(x : Float[Tensor, "batch dmodel"],
     # Compute the projection proj_x = Y_t @ c: (B, dmodel, 1)
     proj_x = torch.bmm(Y_t, c).squeeze(-1)  # (B, dmodel)
 
-    return proj_x
+    return proj_x.to(original_dtype)
 
 def ensure_3d(x):
     dims_to_add = max(0, 3 - x.dim())

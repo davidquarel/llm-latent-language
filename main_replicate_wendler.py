@@ -151,7 +151,7 @@ for (src, dest) in tqdm(lang_pairs):
                                   last_seq = True)
 
     preds = logits.argmax(dim=-1, keepdim=True).to(answers.device)
-    correct = torch.any(preds == answers, dim=-1).sum().item()
+    correct = torch.any((preds == answers) & (preds != tokenizer.pad_token_id), dim=-1).sum().item()
 
     probs = probs_on_answer(logits, answers, padding_id = tokenizer.pad_token_id, log_probs=False)
     mean_loss = -torch.log(probs).mean().item()

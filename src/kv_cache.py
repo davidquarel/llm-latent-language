@@ -76,8 +76,38 @@ def run_with_kv_cache(tokens : Int[Tensor, "batch seq"] | TokenizedSuffixesResul
                     last_seq : bool = False,
                     keep_resid_cache : bool = False,
                     verbose : bool = False,
+                    hook_generator : Callable = None,
                     **kwargs
 ) -> Tuple[Tensor, Tensor]:
+    """Runs inference on a HookedTransformer using a key-value cache for efficient processing of batched inputs.
+
+    Args:
+        tokens: Either a tensor of token IDs with shape [batch, seq] or a TokenizedSuffixesResult object
+               containing input_ids and optional attention_mask.
+        past_kv_cache: Pre-computed key-value cache from previous forward passes.
+        model: HookedTransformer model instance to run inference with.
+        fwd_hooks: Forward hooks to apply during model execution. Can be either:
+                  - List[Callable]: Same hooks applied to all batches
+                  - List[List[Callable]]: Different hooks for each batch slice (if batched_hooks=True)
+        mini_batch_size: Size of mini-batches for processing. Defaults to full batch size if None.
+        last_seq: If True, only returns logits/cache for the last sequence position.
+        keep_resid_cache: If True, caches residual streams from embedding and each transformer block.
+        verbose: If True, shows progress bar during processing.
+        batched_hooks: If True, treats fwd_hooks as batch-specific hooks to be sliced by mini-batch.
+        **kwargs: Additional arguments passed to model.run_with_cache().
+
+    Returns:
+        RunWithKVCacheResult containing:
+            - logits: Output logits with shape [batch, seq, vocab] or [batch, vocab] if last_seq=True
+            - cache: Dictionary of cached tensors (residual streams if keep_resid_cache=True)
+
+    Notes:
+        - The past_kv_cache is frozen and broadcast to match mini_batch_size before processing
+        - Supports efficient batched processing via DataLoader
+        - Can optionally cache residual streams for analysis
+        - Handles attention masking when provided in TokenizedSuffixesResult
+    """
+
     batch, seq = tokens.input_ids.shape
     d_model, d_vocab = model.cfg.d_model, model.cfg.d_vocab
     mini_batch_size = mini_batch_size if mini_batch_size is not None else batch
@@ -122,8 +152,14 @@ def run_with_kv_cache(tokens : Int[Tensor, "batch seq"] | TokenizedSuffixesResul
         chunk_size = chunk_tokens.shape[0]
         if chunk_size != mini_batch_size:
             broadcast_kv_cache(past_kv_cache, chunk_size)
-        
-        with model.hooks(fwd_hooks = fwd_hooks):
+        chunk_slice = slice(tok_c, tok_c+chunk_size)
+        if hook_generator is None:
+            chunk_fwd_hooks = fwd_hooks
+        else:
+            tmp_filter, tmp_hook = hook_generator
+            chunk_fwd_hooks = [(tmp_filter, lambda resid, hook : tmp_hook(resid, hook, chunk_slice))]
+
+        with model.hooks(fwd_hooks = chunk_fwd_hooks):
             logits, cache = model.run_with_cache(chunk_tokens,
                                                 past_kv_cache=past_kv_cache,
                                                 names_filter=resid_name_filter, 
@@ -132,13 +168,13 @@ def run_with_kv_cache(tokens : Int[Tensor, "batch seq"] | TokenizedSuffixesResul
             if last_seq:
                 # Index while on GPU
                 logits = eindex(logits, chunk_ids, "b [b] v -> b v")
-            all_logits[tok_c:tok_c+chunk_size] = logits
+            all_logits[chunk_slice] = logits
 
             for key, value in cache.items():
                 if last_seq:
                     value = eindex(value, chunk_ids, "b [b] m -> b m")
                     assert value.shape == (chunk_size, d_model)
-                all_cache[key][tok_c:tok_c+chunk_size] = value
+                all_cache[key][chunk_slice] = value
         if verbose:
             runner.update(chunk_size)
         tok_c += chunk_size

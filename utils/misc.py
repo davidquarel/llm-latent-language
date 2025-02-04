@@ -1,5 +1,6 @@
 
 import warnings
+import torch
 
 def printd(*args, **kwargs):
     # Check if '__DEBUG__' is in the global namespace and if it is set to True
@@ -7,6 +8,49 @@ def printd(*args, **kwargs):
         print("DEBUG:", end=" ")
         print(*args, **kwargs)
 
+def generate_derangement(n: int) -> torch.Tensor:
+    indices = torch.arange(n)
+    
+    while True:
+        perm = torch.randperm(n)
+        if torch.all(perm != indices):  # Ensure no element stays in its original position
+            return perm
+
+def dearrange(tensor: torch.Tensor, dim: int) -> torch.Tensor:
+    """
+    Returns a deranged version of the input tensor along the specified dimension.
+    
+    Args:
+        tensor (torch.Tensor): Input tensor of any shape.
+        dim (int): Dimension to derange over.
+    
+    Returns:
+        torch.Tensor: A deranged version of the input tensor along the specified dimension.
+    """
+    size = tensor.shape[dim]
+    perm = generate_derangement(size)  # Get a derangement of the specified dimension
+    perm = perm.to(tensor.device)
+    return tensor.index_select(dim, perm)  # Apply derangement along the specified dimension
+
+
+def autoreload():
+    def is_notebook():
+        try:
+            shell = get_ipython().__class__.__name__
+            if shell == 'ZMQInteractiveShell':  # Jupyter notebook/lab
+                return True
+            elif shell == 'TerminalInteractiveShell':  # IPython terminal
+                return True
+            return False
+        except:
+            return False
+
+    if is_notebook():
+        try:
+            get_ipython().run_line_magic('load_ext', 'autoreload')
+            get_ipython().run_line_magic('autoreload', '2')
+        except:
+            pass
 
 
 def str_dict(d):
