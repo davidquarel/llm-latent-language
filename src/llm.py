@@ -74,7 +74,8 @@ def proj_batched_slow(x : Float[Tensor, "batch dmodel"],
 
 def proj_batched(x : Float[Tensor, "batch dmodel"], 
              Y : Float[Tensor, "batch numvec dmodel"], 
-             epsilon=1e-8) -> Float[Tensor, "batch dmodel"]:
+             epsilon=1e-8,
+             return_coeff = False) -> Float[Tensor, "batch dmodel"]:
     """
     Computes the projection of x onto the subspace spanned by the rows of Y for each batch.
 
@@ -124,7 +125,10 @@ def proj_batched(x : Float[Tensor, "batch dmodel"],
     # Compute the projection proj_x = Y_t @ c: (B, dmodel, 1)
     proj_x = torch.bmm(Y_t, c).squeeze(-1)  # (B, dmodel)
 
-    return proj_x.to(original_dtype)
+    if return_coeff:
+        return proj_x.to(original_dtype), c.squeeze().to(original_dtype)
+    else:
+        return proj_x.to(original_dtype)
 
 def ensure_3d(x):
     dims_to_add = max(0, 3 - x.dim())
@@ -178,6 +182,7 @@ def safe_tokenize(suffixes : List[str] | str,
         idx = attn_mask.sum(dim=-1) - 1 #-1, and another two more: one for the space token, one for the 🌍 token
     
     else: # models that do not add leading spaces
+        suffixes = list(suffixes)
         suffix_tokens, attn_mask = tokenizer(suffixes,
                                             add_special_tokens=False,
                                             return_tensors="pt",

@@ -113,7 +113,7 @@ def run_with_kv_cache(tokens : Int[Tensor, "batch seq"] | TokenizedSuffixesResul
     mini_batch_size = mini_batch_size if mini_batch_size is not None else batch
     
     if keep_resid_cache:
-        resid_name_filter = ["hook_embed"] + [f"blocks.{x}.hook_resid_post" for x in range(model.cfg.n_layers)]
+        resid_name_filter = [f"blocks.{x}.hook_resid_post" for x in range(model.cfg.n_layers)]
     else:
         resid_name_filter = []
 
@@ -129,20 +129,24 @@ def run_with_kv_cache(tokens : Int[Tensor, "batch seq"] | TokenizedSuffixesResul
     broadcast_kv_cache(past_kv_cache, mini_batch_size)
 
     #dummy run to get shapes
-    sample_logits, sample_cache = model.run_with_cache(tokens.input_ids[:1])
+    # TODO this is really stupid and adds a lot of latency for no reason
+    if keep_resid_cache:
+        sample_logits, sample_cache = model.run_with_cache(tokens.input_ids[:1])
 
     seq_shape = () if last_seq else (seq,)
     
     all_logits = torch.empty((batch, *seq_shape, d_vocab), 
-                            device=sample_logits.device,
-                            dtype=sample_logits.dtype)
+                            device=model.W_U.device,
+                            dtype=model.W_U.dtype)
+    
     all_cache = {}
-    for key in sample_cache:
-        if key in resid_name_filter:
-            # only works for resid
-            all_cache[key] = torch.empty((batch, *seq_shape, d_model),
-                                        device=sample_cache[key].device,
-                                        dtype=sample_cache[key].dtype)
+    if keep_resid_cache:
+        for key in sample_cache:
+            if key in resid_name_filter:
+                # only works for resid
+                all_cache[key] = torch.empty((batch, *seq_shape, d_model),
+                                            device=sample_cache[key].device,
+                                            dtype=sample_cache[key].dtype)
         
     if verbose:
         runner = tqdm(total=batch)
@@ -170,11 +174,12 @@ def run_with_kv_cache(tokens : Int[Tensor, "batch seq"] | TokenizedSuffixesResul
                 logits = eindex(logits, chunk_ids, "b [b] v -> b v")
             all_logits[chunk_slice] = logits
 
-            for key, value in cache.items():
-                if last_seq:
-                    value = eindex(value, chunk_ids, "b [b] m -> b m")
-                    assert value.shape == (chunk_size, d_model)
-                all_cache[key][chunk_slice] = value
+            if keep_resid_cache:
+                for key, value in cache.items():
+                    if last_seq:
+                        value = eindex(value, chunk_ids, "b [b] m -> b m")
+                        assert value.shape == (chunk_size, d_model)
+                    all_cache[key][chunk_slice] = value
         if verbose:
             runner.update(chunk_size)
         tok_c += chunk_size

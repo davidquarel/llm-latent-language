@@ -16,7 +16,7 @@ def generate_derangement(n: int) -> torch.Tensor:
         if torch.all(perm != indices):  # Ensure no element stays in its original position
             return perm
 
-def dearrange(tensor: torch.Tensor, dim: int) -> torch.Tensor:
+def dearrange(tensor: torch.Tensor, dim: int = -1) -> torch.Tensor:
     """
     Returns a deranged version of the input tensor along the specified dimension.
     

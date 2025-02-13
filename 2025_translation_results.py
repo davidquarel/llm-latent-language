@@ -38,6 +38,7 @@ from transformer_lens.utils import test_prompt
 from types import SimpleNamespace
 from tqdm import tqdm
 from typing import Literal
+from einops import einsum
 # Import GPT-2 tokenizer
 #disable gradients
 torch.set_grad_enabled(False)
@@ -51,13 +52,14 @@ class Config:
     seed: int = 42
     #model_name: str = "meta-llama/Llama-3.1-8B"
     model_name: str = "meta-llama/Llama-2-7b-hf"
+    #model_name: str = "google/gemma-2-2b"
     #model_name: str = "mistralai/Mistral-7B-v0.1"
     # single_token_only: bool = False
     # multi_token_only: bool = False
     # out_dir: str = './out_iclr'
     dataset_path: str = "data_wendler/word_list.csv"
     task : Literal["translate", "copy", "cloze"] = "translate"
-    debug: bool = True
+    debug: bool = False
     
     devices : Optional[str] = "1,2"
     out : Optional[str] = "out_icml_2025"
@@ -68,6 +70,8 @@ class Config:
     num_multi_shot : int = 5
 
     mini_batch_size : int = None
+    steer_mini_batch_size : int = None
+    dummy_run : bool = False
 
 cfg = Config()
 cfg = try_parse_args(cfg)
@@ -75,6 +79,8 @@ cfg_dict = asdict(cfg)
 print(cfg_dict)
 
 model_basename = cfg.model_name.split('/')[-1]
+
+# %%
 
 if cfg.devices is not None:
     os.environ["CUDA_VISIBLE_DEVICES"] = cfg.devices  # Makes only GPUs 0 and 1 visible
@@ -141,12 +147,12 @@ def save_df(df, latent_type, cfg) -> None:
 
 
 def stats(src : str, 
-            dest : str, 
-            lang_latent : str, 
-            logits : Float[Tensor, "batch seq d_vocab"],
-            answers : Int[Tensor, "batch answers"], 
-            padding_id : int = tokenizer.pad_token_id, 
-            latent_type : str = 'clean' 
+        dest : str, 
+        logits : Float[Tensor, "batch seq d_vocab"],
+        answers : Int[Tensor, "batch answers"], 
+        padding_id : int = tokenizer.pad_token_id, 
+        verbose : bool = False,
+        **kwargs
 )-> dict[str, Any]:
     preds = logits.argmax(dim=-1, keepdim=True).to(answers.device)
     correct_mask = (preds == answers) & (preds != tokenizer.pad_token_id)
@@ -159,9 +165,10 @@ def stats(src : str,
 
     acc = correct / answers.shape[0]
     ci95_acc = 1.96 * np.sqrt(acc * (1-acc) / answers.shape[0])
-    print(f"{src} -> del {lang_latent} -> {dest} Translated {correct}/{answers.shape[0]} correctly. Accuracy: {acc:.2%} Loss: {mean_loss:.2f} Probs {mean_probs:.2f} ± {ci95_probs:.2f}")
-    result = {'latent_type': latent_type,
-                'src_lang': src, 
+    lang_latent = kwargs.get('lang_latent', None)
+    if verbose:
+        print(f"{src} -> del {lang_latent} -> {dest} Translated {correct}/{answers.shape[0]} correctly. Accuracy: {acc:.2%} Loss: {mean_loss:.2f} Probs {mean_probs:.2f} ± {ci95_probs:.2f}")
+    result = {  'src_lang': src, 
                 'dest_lang': dest, 
                 'latent_lang': lang_latent, 
                 'prob': mean_probs, 
@@ -172,6 +179,8 @@ def stats(src : str,
                 'total': answers.shape[0],
                 'acc': acc,
                 'ci95_acc': ci95_acc}
+    
+    result.update(kwargs)
     return result
 
 
@@ -235,8 +244,8 @@ def run_latent(cfg,
     LANGS = ['fr', 'de', 'ru', 'zh', 'es','en']
     LATENT_LANGS = LANGS
 
-    
     output_results = []
+    
     resid_filter = lambda x : x.endswith("resid_post")
     print(f"Computing translation probabilities, interv {latent_type}")
 
@@ -329,17 +338,169 @@ def run_latent(cfg,
                 break
     
     output_results = pd.DataFrame(output_results)
-    save_df(output_results, "clean", cfg)
+    save_df(output_results, latent_type=latent_type, cfg=cfg)
 
     return output_results
+# %%
+# ==============================================
+# %%
+def run_steer(src, dest, dummy_run = False, count= None):
+    LANGS = ['fr', 'de', 'ru', 'zh', 'es','en']
+    #if not dummy_run:
+        
+    FOREIGN_LANGS = [lang for lang in LANGS if lang not in ['en']]
+
+    resid_filter = lambda x : x.endswith("resid_post")
+
+    df = pd.read_csv(cfg.dataset_path)
+
+    mask = df['en'].isin(WORD_LIST)
+    prompt_df, suffix_df = df[mask], df[~mask]
+
+    shuffle_idx = dearrange(torch.arange(len(suffix_df)))
+    suffix_df_dearrange = suffix_df.iloc[shuffle_idx].reset_index(drop=True)
+
+    all_answers = {}
+
+    for lang in LANGS:
+        answers = get_answer_tensor2(suffix_df[lang], tokenizer, vocab, cfg, 
+                                                padding_value=tokenizer.pad_token_id)
+        all_answers[lang] = answers
+
+    primary_en_answer = safe_tokenize(" " + suffix_df['en'], tokenizer).input_ids[:, 0] # (batch,)
+    en_subspace = model.W_U.T[primary_en_answer] #(batch, d_model)
+    en_subspace = en_subspace / torch.norm(en_subspace, dim=-1, keepdim=True) # normalized subspace
+
+    #src, dest = 'zh', 'fr'
+    # #pairs = list(permutations(LANGS, 2))
+    # pairs= [('zh', 'fr')]
+    # runner = pairs
+    # for (src, dest) in runner:
+    
+    #src, dest = 'zh', 'fr'
+        
+    prompt = gen_prompt(prompt_df, src, dest)
+    clean_common_suffixes = gen_common_suffixes(suffix_df[src], src, dest)
+    kv_cache = gen_kv_cache(prompt, model)
+    clean_suffix_toks = safe_tokenize(clean_common_suffixes, model)
+
+    clean_logits, clean_cache = run_with_kv_cache(tokens = clean_suffix_toks, 
+                                past_kv_cache = kv_cache, 
+                                model = model,
+                                mini_batch_size = cfg.mini_batch_size,
+                                keep_resid_cache= True,
+                                last_seq = True,
+                                verbose=False)
+                                        
+    c_new_all = torch.stack([einsum(en_subspace, resid.to(en_subspace.device), "batch d_model, batch d_model -> batch")
+                    for resid in clean_cache.values()], dim=0) # (n_layers, batch)
+
+    steer_common_suffixes = gen_common_suffixes(suffix_df_dearrange[src], src, dest)
+    steer_suffix_toks = safe_tokenize(steer_common_suffixes, model)
+
+
+    def hook_steer(resid : Float[Tensor, "minibatch seq d_model"], #resid in dearranged order
+                hook : HookPoint,
+                slice_idx : slice,
+        ) -> Float[Tensor, "minibatch seq d_model"]:
+            dev = resid.device
+            last_seq = steer_suffix_toks.indices[slice_idx].to(dev) #(minibatch)
+            idx = torch.arange(resid.shape[0], device=resid.device) # (minibatch)
+            layer = hook.layer()
+            #W_U_old = en_subspace[slice_idx] # (minibatch, d_model)
+            #c_old = c_old[layer, slice_idx, None] # (minibatch, 1)
+            resid_last_seq = resid[idx, last_seq] # (minibatch, d_model)
+
+            W_U_new = en_subspace[slice_idx].to(dev) # (minibatch, d_model)
+            c_new = c_new_all[layer][slice_idx].to(dev) # (minibatch) 
+
+            W_U_old = en_subspace[shuffle_idx][slice_idx].to(dev) # (minibatch, d_model)
+            c_old = einsum(resid_last_seq, W_U_old, "minibatch d_model, minibatch d_model -> minibatch") # (minibatch)
+            new_resid = resid_last_seq - c_old[:, None] * W_U_old + c_new[:, None] * W_U_new
+
+            resid[idx, last_seq] = new_resid
+            return resid
+
+    n_layers = model.cfg.n_layers
+    pairs = [(i, j) for i in range(n_layers) for j in range(i+1, n_layers)]
+    output_results = []
+    
+    for (start,end) in tqdm(pairs):
+
+
+        def hook_steer_filter(x) -> bool:
+            pattern = r"blocks\.(\d+)\.hook_resid_post"
+            match = re.match(pattern, x)
+            if match:
+                layer = int(match.group(1))
+                return start <= layer < end
+
+            return False
+
+        steer_logits, _ = run_with_kv_cache(tokens = steer_suffix_toks,
+                                            past_kv_cache=kv_cache,
+                                            model=model,
+                                            mini_batch_size=cfg.mini_batch_size,
+                                            keep_resid_cache=False,
+                                            last_seq=True,
+                                            hook_generator=(hook_steer_filter, hook_steer))
+
+        clean_stats = stats(src=src, dest=dest, logits=clean_logits,
+                            answers=all_answers[dest], latent_type='clean', verbose=False, l_start = start, l_end = end)
+        
+        steer_from = stats(src=src, dest=dest, logits=steer_logits,
+                            answers=all_answers[dest][shuffle_idx], latent_type = 'steer_from', verbose=False, l_start = start, l_end = end)
+        
+        steer_from_en = stats(src=src, dest='en', logits=steer_logits,
+                            answers=all_answers['en'][shuffle_idx], latent_type = 'steer_from', verbose=False, l_start = start, l_end = end)
+        
+        steer_to = stats(src=src, dest=dest, lang_latent='new', logits=steer_logits,
+                            answers=all_answers[dest], latent_type = 'steer_to', verbose=False, l_start = start, l_end = end)
+        
+        steer_to_en = stats(src=src, dest='en', lang_latent='new', logits=steer_logits,
+                            answers=all_answers['en'], latent_type = 'steer_to', verbose=False, l_start = start, l_end = end)
+        
+        output_results.append(clean_stats)
+        output_results.append(steer_from)
+        output_results.append(steer_from_en)
+        output_results.append(steer_to)
+        output_results.append(steer_to_en)
+
+        clean_acc, steer_from_acc, steer_from_en_acc, steer_to_acc, steer_to_en_acc = [x['acc'] for x in [clean_stats, steer_from, steer_from_en, steer_to, steer_to_en]]
+        clean_probs, steer_from_probs, steer_from_en_probs, steer_to_probs, steer_to_en_probs = [x['prob'] for x in [clean_stats, steer_from, steer_from_en, steer_to, steer_to_en]]
+
+        table_data = [
+            ["Metric", "Clean", "Steer From", "Steer From EN", "Steer To", "Steer To EN"],
+            ["Accuracy", f"{clean_acc:.2%}", f"{steer_from_acc:.2%}", f"{steer_from_en_acc:.2%}", f"{steer_to_acc:.2%}", f"{steer_to_en_acc:.2%}"],
+            ["Probability", f"{clean_probs:.2f}", f"{steer_from_probs:.2f}", f"{steer_from_en_probs:.2f}", f"{steer_to_probs:.2f}", f"{steer_to_en_probs:.2f}"]
+        ]
+        print(f'Steer layers {start} to {end}, {src} -> {dest} : {count} / 20')
+        print(tabulate(table_data, headers="firstrow", tablefmt="pretty"))
+
+    return output_results
+#output_results = pd.DataFrame(output_results)
+#save_df(output_results, latent_type=f"steer_{start}_{end}", cfg=cfg)
 
 
 # %%
+#out = run_steer()
 if __name__ ==  "__main__":
     
     print("running clean")
-    #output_results = run(cfg)
+    output_results = run(cfg)
     for latent_type in ['random', 'shuffle', 'unembed']:
         print("running latent")
         output_results = run_latent(cfg, latent_type=latent_type)
+    print("running steer")
+    output_results = run_steer()
+# %%
+F_LANGS = ['fr', 'de', 'ru', 'zh', 'es']
+count = 1
+for (src, dest) in list(permutations(F_LANGS, 2)):
+    print(f"{src} -> {dest}")
+    full_sweep = run_steer(src, dest, count=count)
+    full_sweep_df = pd.DataFrame(full_sweep)
+    save_df(full_sweep_df, f"steer_{src}_{dest}", cfg)
+    count +=1
+
 # %%
