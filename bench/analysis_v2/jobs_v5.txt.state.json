@@ -1,0 +1,3 @@
+{
+ "--write_prompt own --mode swap --alpha 3 --start_step 3 --grid full --shots 8 --dataset_path data_wendler/word_list_v2_en1tok.csv --word_chunk 120 --langs de,ru,zh,ko --tag v2en1ctlfr": "done"
+}

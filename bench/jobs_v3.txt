@@ -1,0 +1,6 @@
+--write_prompt own --mode swap --alpha 3 --start_step 3 --grid full --shots 8
+--write_prompt own --mode swap --alpha 3 --start_step 3 --grid full --shots 12
+--write_prompt own --mode swap --alpha 4 --start_step 3 --grid full --shots 8
+--write_prompt own --mode swap --alpha 3 --start_step 3 --grid full --shots 8 --dataset_path data_wendler/word_list_v2.csv --word_chunk 120 --tag v2
+--write_prompt own --mode swap --alpha 3 --start_step 3 --grid full --shots 8 --latent_lang es --tag ctl
+--write_prompt own --mode swap --alpha 1 --start_step 3 --grid full --dataset_path data_wendler/word_list_v2.csv --word_chunk 120 --tag v2

@@ -339,6 +339,37 @@ class SteerSpec:
     u_old: torch.Tensor  # (W,d) float, unit
     u_new: torch.Tensor  # (W,d) float, unit
     c_new: torch.Tensor  # (nL,W) float
+    mode: str = "swap"  # swap | add | remove | patch | patch_en | patch_noen
+    alpha: float = 1.0
+    r_read: Optional[torch.Tensor] = None  # (nL,W,d) clean read-context resid_post (for patch modes)
+
+
+def _proj2(v, uo, un):
+    """projection of v onto span{uo, un} (rows), via Gram-Schmidt."""
+    e1 = uo
+    e2 = un - (un * e1).sum(-1, keepdim=True) * e1
+    n2 = e2.norm(dim=-1, keepdim=True)
+    e2 = torch.where(n2 > 1e-6, e2 / n2.clamp(min=1e-6), torch.zeros_like(e2))
+    return (v * e1).sum(-1, keepdim=True) * e1 + (v * e2).sum(-1, keepdim=True) * e2
+
+
+def apply_intervention(mode, alpha, x, uo, un, cn, rr):
+    """x: (n,d) fp32 resid at the query position of the WRITE run (about word pi(i));
+    uo/un: unit latent directions of the old (pi(i)) / new (i) word; cn: coefficient of the new word's
+    direction in the clean READ run; rr: full READ-run resid (for patch modes)."""
+    if mode == "swap":      # original: replace old word's coefficient by new word's
+        return x - (x * uo).sum(-1, keepdim=True) * uo + alpha * cn[:, None] * un
+    if mode == "add":       # only add the new word's direction
+        return x + alpha * cn[:, None] * un
+    if mode == "remove":    # only remove the old word's direction
+        return x - (x * uo).sum(-1, keepdim=True) * uo
+    if mode == "patch":     # full activation patch from the read run (upper bound)
+        return rr.clone()
+    if mode == "patch_en":  # patch only the 2-d latent subspace span{uo,un} from the read run
+        return x - _proj2(x, uo, un) + alpha * _proj2(rr, uo, un)
+    if mode == "patch_noen":  # patch everything EXCEPT span{uo,un}
+        return rr - _proj2(rr, uo, un) + _proj2(x, uo, un)
+    raise ValueError(mode)
 
 
 def class_table(configs: List[Tuple[int, int]], nL: int) -> torch.Tensor:
@@ -480,6 +511,8 @@ def engine_gen(M: LastTokModel, ctx: Context, configs: List[Tuple[int, int]], wo
     if steer is not None:
         for dv in set(M.dev):
             steer_dev[dv] = {"u_old": steer.u_old.to(dv), "u_new": steer.u_new.to(dv), "c_new": steer.c_new.float().to(dv)}
+            if steer.r_read is not None:
+                steer_dev[dv]["r_read"] = steer.r_read.float().to(dv)
     for dv, st_ in streams.items():  # steer tensors were made on the default streams
         st_.wait_stream(torch.cuda.current_stream(dv))
     for t in range(max_new + 1):
@@ -572,7 +605,8 @@ def engine_gen(M: LastTokModel, ctx: Context, configs: List[Tuple[int, int]], wo
                 sv = steer_dev[dev]
                 xs = x[sidx].float()
                 uo, un, cn = sv["u_old"][w_rep], sv["u_new"][w_rep], sv["c_new"][l][w_rep]
-                xs = xs - (xs * uo).sum(-1, keepdim=True) * uo + cn[:, None] * un
+                xs = apply_intervention(steer.mode, steer.alpha, xs, uo, un, cn,
+                                        sv["r_read"][l][w_rep] if "r_read" in sv else None)
                 x[sidx] = xs.to(x.dtype)
             if record_resid and t == 0:
                 resid_rec[l] = x[packs[(l, "rec")]].float().cpu()
@@ -688,6 +722,12 @@ class Cfg:
     dtype: str = "bfloat16"
     max_mem_gb: float = 0.0
     layer_split: str = "1.25,1,0.8"  # relative #layers per device
+    mode: str = "swap"
+    alpha: float = 1.0
+    start_step: int = 1  # >1: coarse grid over start layers (end layers stay dense)
+    shots: int = 4  # few-shot examples in the prompt (4 = the original WORD_LIST)
+    exclude_latent: bool = False  # drop the latent language from the permutation languages
+    known: bool = True  # also measure whether the model can translate word i in the write context
 
 
 def load_model(cfg: Cfg):
@@ -758,21 +798,27 @@ def main(cfg: Cfg):
 
     df = pd.read_csv(cfg.dataset_path)
     mask = df["en"].isin(WORD_LIST)
+    if cfg.shots > 4:  # add more few-shot examples (fixed random words, removed from the eval set)
+        extra = df[~mask].sample(cfg.shots - 4, random_state=0).index
+        mask = mask | df.index.isin(extra)
     prompt_df, suffix_df = df[mask], df[~mask].reset_index(drop=True)
     W = len(suffix_df)
-    if cfg.shuffle_path:
-        shuffle_idx = torch.load(cfg.shuffle_path)
+    sh_ = torch.load(cfg.shuffle_path) if cfg.shuffle_path else None
+    if sh_ is not None and len(sh_) == W:
+        shuffle_idx = sh_
     else:
         from utils.misc import dearrange
         shuffle_idx = dearrange(torch.arange(W))
     sdf = suffix_df.iloc[shuffle_idx.numpy()].reset_index(drop=True)
 
     L = cfg.langs.split(",")
+    if cfg.exclude_latent:
+        L = [x for x in L if x != cfg.latent_lang]
     perms = list(itertools.permutations(L)) if not cfg.perms else [tuple(p.split(",")) for p in cfg.perms.split(";")]
     if cfg.max_perms:
         perms = perms[: cfg.max_perms]
     ends = nL if cfg.grid == "orig" else nL + 1
-    configs = [(s, e) for s in range(nL) for e in range(s + 1, ends)]
+    configs = [(s, e) for s in range(0, nL, cfg.start_step) for e in range(s + 1, ends)]
 
     u_lat = latent_dirs(M, list(suffix_df[cfg.latent_lang]), cfg.latent_lang, cfg.direction)  # (W,d) word i
     @dataclass
@@ -812,7 +858,8 @@ def main(cfg: Cfg):
                           orig_ans={"clean": oa(dest, suffix_df)}, max_new=cfg.max_new, record_resid=True)
         resid = rres["resid"]  # (nL, W, d)
         c_new = torch.einsum("lwd,wd->lw", resid, u_lat)
-        steer = SteerSpec(u_old=u_lat[shuffle_idx], u_new=u_lat, c_new=c_new)
+        steer = SteerSpec(u_old=u_lat[shuffle_idx], u_new=u_lat, c_new=c_new, mode=cfg.mode, alpha=cfg.alpha,
+                          r_read=resid if cfg.mode.startswith("patch") else None)
         t_clean = time.time() - t0 - t_pref
         # write rows: row j queries sdf word j (= suffix word shuffle_idx[j]); inject word j
         cand = {
@@ -823,6 +870,15 @@ def main(cfg: Cfg):
         }
         if cfg.latent_lang not in ("en", dest2):
             cand["steer_to_lat"] = [candidates(x, cfg.latent_lang) for x in suffix_df[cfg.latent_lang]]
+        cand["steer_to_rdest"] = [candidates(x, dest) for x in suffix_df[dest]]  # word i in the READ language
+        # does the model know word i -> dest2 in this write context? (unsteered, unshuffled)
+        known = torch.ones(W, dtype=torch.bool)
+        if cfg.known:
+            kctx = prefill(M, wprompt, gen_common_suffixes(suffix_df[src2], src2, dest2))
+            kres = run_engine(M, kctx, [(nL, nL + 1)], torch.arange(W), None,
+                              Scorer(tb, {"k": [candidates(x, dest2) for x in suffix_df[dest2]]}), max_new=cfg.max_new)
+            known = (kres["done"][0] & 1).bool()
+            del kctx
         sc = Scorer(tb, cand)
         orig_ans = {"steer_to": oa(dest2, suffix_df), "steer_from": oa(dest2, sdf),
                     "steer_to_en": oa("en", suffix_df), "steer_from_en": oa("en", sdf)}
@@ -869,6 +925,8 @@ def main(cfg: Cfg):
                        clean_exact=clean_acc, clean_orig=clean_orig)
             for ki, k in enumerate(sc.classes):
                 rec[f"{k}_exact"] = ((done[ci] >> ki) & 1).float().mean().item()
+            rec["known_frac"] = known.float().mean().item()
+            rec["steer_to_known"] = (((done[ci] & 1).bool() & known).float().sum() / known.float().sum().clamp(min=1)).item()
             rows_out.append(rec)
         # orig metrics vectorised
         for k in orig_ans:
@@ -884,7 +942,9 @@ def main(cfg: Cfg):
               f"clean exact {clean_acc:.2f} orig {clean_orig:.2f}; best steer_to_exact {best['steer_to_exact']:.2f} @ [{best['l_start']},{best['l_end']})", flush=True)
     res = pd.DataFrame(rows_out)
     tag = f"_{cfg.tag}" if cfg.tag else ""
-    path = os.path.join(cfg.out, mb, f"steer_{cfg.latent_lang}_{cfg.direction}_{cfg.write_prompt}{tag}.csv")
+    mtag = "" if (cfg.mode == "swap" and cfg.alpha == 1.0) else f"_{cfg.mode}{cfg.alpha:g}"
+    stag = "" if cfg.shots == 4 else f"_shots{cfg.shots}"
+    path = os.path.join(cfg.out, mb, f"steer_{cfg.latent_lang}_{cfg.direction}_{cfg.write_prompt}{mtag}{stag}{tag}.csv")
     os.makedirs(os.path.dirname(path), exist_ok=True)
     res.to_csv(path, index=False)
     pd.DataFrame(timing).to_csv(path.replace(".csv", "_timing.csv"), index=False)

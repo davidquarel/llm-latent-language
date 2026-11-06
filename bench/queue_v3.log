@@ -1,0 +1,12 @@
+19:51:01 RUN 0 1,2 --write_prompt own --mode swap --alpha 3 --start_step 3 --grid full --shots 8
+19:55:30 DONE 0 269s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_swap3_shots8.csv; total 262.6s']
+19:55:30 RUN 1 1,2 --write_prompt own --mode swap --alpha 3 --start_step 3 --grid full --shots 12
+19:59:58 DONE 1 267s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_swap3_shots12.csv; total 261.1s']
+19:59:58 RUN 2 1,2 --write_prompt own --mode swap --alpha 4 --start_step 3 --grid full --shots 8
+20:04:25 DONE 2 268s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_swap4_shots8.csv; total 261.3s']
+20:04:25 RUN 3 1,2 --write_prompt own --mode swap --alpha 3 --start_step 3 --grid full --shots 8 --dataset_path data_wendler/word_list_v2.csv --word_chunk 120 --tag v2
+20:17:01 DONE 3 756s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_swap3_shots8_v2.csv; total 749.7s']
+20:17:01 RUN 4 1,2 --write_prompt own --mode swap --alpha 3 --start_step 3 --grid full --shots 8 --latent_lang es --tag ctl
+20:21:35 DONE 4 274s ['saved out_v2/Llama-2-7b-hf/steer_es_first_own_swap3_shots8_ctl.csv; total 267.5s']
+20:21:35 RUN 5 1,2 --write_prompt own --mode swap --alpha 1 --start_step 3 --grid full --dataset_path data_wendler/word_list_v2.csv --word_chunk 120 --tag v2
+20:33:46 DONE 5 731s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_v2.csv; total 724.3s']

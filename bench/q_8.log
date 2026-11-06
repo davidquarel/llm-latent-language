@@ -1,0 +1,106 @@
+Parsed Configuration:
+model_name: /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d
+dataset_path: data_wendler/word_list.csv
+langs: fr,de,ru,zh
+latent_lang: en
+direction: first
+write_prompt: own
+grid: full
+perms: 
+max_perms: 0
+cfg_chunk: 32
+inflight: 2
+word_chunk: 1000
+devices: 1,2
+max_new: 24
+out: out_v2
+seed: 42
+shuffle_path: bench/orig_l2_7b.csv.shuffle.pt
+tag: 
+dtype: bfloat16
+max_mem_gb: 0.0
+layer_split: 1.15,1
+mode: swap
+alpha: 1.0
+start_step: 3
+shots: 8
+exclude_latent: False
+known: True
+loaded /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d in 6.0s  layers=32 devs=['cuda:1', 'cuda:2']
+[1/24] fr->de | ru->zh: 12.7s (prefill 1.7, clean 0.5, sweep 10.5) clean exact 0.82 orig 0.84; best steer_to_exact 0.16 @ [0,22)
+[2/24] fr->de | zh->ru: 10.6s (prefill 0.8, clean 0.3, sweep 9.5) clean exact 0.82 orig 0.84; best steer_to_exact 0.27 @ [0,22)
+[3/24] fr->ru | de->zh: 11.7s (prefill 1.6, clean 0.4, sweep 9.8) clean exact 0.75 orig 0.81; best steer_to_exact 0.14 @ [12,22)
+[4/24] fr->ru | zh->de: 9.7s (prefill 0.7, clean 0.3, sweep 8.6) clean exact 0.75 orig 0.81; best steer_to_exact 0.31 @ [0,22)
+[5/24] fr->zh | de->ru: 12.1s (prefill 1.6, clean 0.5, sweep 10.0) clean exact 0.67 orig 0.78; best steer_to_exact 0.33 @ [0,22)
+[6/24] fr->zh | ru->de: 10.5s (prefill 0.9, clean 0.5, sweep 9.1) clean exact 0.67 orig 0.78; best steer_to_exact 0.31 @ [0,22)
+[7/24] de->fr | ru->zh: 12.3s (prefill 1.6, clean 0.4, sweep 10.3) clean exact 0.85 orig 0.87; best steer_to_exact 0.14 @ [0,22)
+[8/24] de->fr | zh->ru: 11.0s (prefill 1.0, clean 0.3, sweep 9.8) clean exact 0.85 orig 0.87; best steer_to_exact 0.29 @ [0,22)
+[9/24] de->ru | fr->zh: 11.7s (prefill 1.6, clean 0.3, sweep 9.7) clean exact 0.84 orig 0.90; best steer_to_exact 0.16 @ [0,22)
+[10/24] de->ru | zh->fr: 9.6s (prefill 0.8, clean 0.3, sweep 8.5) clean exact 0.84 orig 0.90; best steer_to_exact 0.22 @ [3,21)
+[11/24] de->zh | fr->ru: 12.0s (prefill 1.6, clean 0.5, sweep 9.8) clean exact 0.64 orig 0.79; best steer_to_exact 0.35 @ [3,22)
+[12/24] de->zh | ru->fr: 9.9s (prefill 0.8, clean 0.5, sweep 8.6) clean exact 0.64 orig 0.79; best steer_to_exact 0.25 @ [0,21)
+[13/24] ru->fr | de->zh: 12.0s (prefill 1.6, clean 0.3, sweep 10.1) clean exact 0.83 orig 0.84; best steer_to_exact 0.14 @ [0,22)
+[14/24] ru->fr | zh->de: 10.0s (prefill 0.9, clean 0.3, sweep 8.8) clean exact 0.83 orig 0.84; best steer_to_exact 0.33 @ [12,21)
+[15/24] ru->de | fr->zh: 11.6s (prefill 1.7, clean 0.3, sweep 9.6) clean exact 0.89 orig 0.91; best steer_to_exact 0.16 @ [0,22)
+[16/24] ru->de | zh->fr: 9.4s (prefill 0.8, clean 0.3, sweep 8.3) clean exact 0.89 orig 0.91; best steer_to_exact 0.25 @ [0,21)
+[17/24] ru->zh | fr->de: 10.9s (prefill 1.6, clean 0.5, sweep 8.8) clean exact 0.64 orig 0.77; best steer_to_exact 0.40 @ [0,22)
+[18/24] ru->zh | de->fr: 9.8s (prefill 0.9, clean 0.5, sweep 8.4) clean exact 0.64 orig 0.77; best steer_to_exact 0.30 @ [0,21)
+[19/24] zh->fr | de->ru: 12.0s (prefill 1.7, clean 0.3, sweep 10.1) clean exact 0.74 orig 0.78; best steer_to_exact 0.31 @ [3,22)
+[20/24] zh->fr | ru->de: 10.3s (prefill 0.9, clean 0.3, sweep 9.1) clean exact 0.74 orig 0.78; best steer_to_exact 0.32 @ [0,22)
+[21/24] zh->de | fr->ru: 11.7s (prefill 1.6, clean 0.3, sweep 9.8) clean exact 0.71 orig 0.78; best steer_to_exact 0.36 @ [9,22)
+[22/24] zh->de | ru->fr: 9.6s (prefill 0.9, clean 0.3, sweep 8.4) clean exact 0.71 orig 0.78; best steer_to_exact 0.26 @ [0,21)
+[23/24] zh->ru | fr->de: 10.7s (prefill 1.6, clean 0.3, sweep 8.7) clean exact 0.70 orig 0.80; best steer_to_exact 0.36 @ [15,22)
+[24/24] zh->ru | de->fr: 9.6s (prefill 0.9, clean 0.3, sweep 8.4) clean exact 0.70 orig 0.80; best steer_to_exact 0.30 @ [6,22)
+saved out_v2/Llama-2-7b-hf/steer_en_first_own_shots8.csv; total 267.6s
+PROFILE {'index': 5.49, 'rows_t0': 7182720, 'layers': 28.81, 'logits': 125.68, 'score': 9.29, 'rows_gen': 11109516, 'layers_gen': 41.77}
+peak GiB per device: [0.0, 10.79, 12.05] weights: [0.0, 6.65, 5.9]
+INFO:root:Not in an IPython environment: name 'get_ipython' is not defined
+`torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]
+Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.70s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  2.28s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  2.50s/it]
+[W1106 19:22:47.994517599 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 18808832, total: 16750149632).
+[W1106 19:22:58.297295205 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 8323072, total: 16750149632).
+[W1106 19:23:07.395984714 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 12517376, total: 16750149632).
+[W1106 19:23:10.762110869 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 8323072, total: 16750149632).
+[W1106 19:23:20.117179221 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 12517376, total: 16750149632).
+[W1106 19:23:27.781941522 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 16711680, total: 16750149632).
+[W1106 19:23:31.716221442 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 16711680, total: 16750149632).
+[W1106 19:23:39.833982215 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 4128768, total: 16750149632).
+[W1106 19:23:42.126629154 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 14614528, total: 16750149632).
+[W1106 19:23:50.306817666 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 12517376, total: 16750149632).
+[W1106 19:23:53.075324865 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 18808832, total: 16750149632).
+[W1106 19:24:02.653478136 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 16711680, total: 16750149632).
+[W1106 19:24:05.896530130 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 8323072, total: 16750149632).
+[W1106 19:24:14.369199261 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 6225920, total: 16750149632).
+[W1106 19:24:17.004571537 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 2031616, total: 16750149632).
+[W1106 19:24:28.513713600 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 18808832, total: 16750149632).
+[W1106 19:24:35.291232664 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 10420224, total: 16750149632).
+[W1106 19:24:39.347668755 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 10420224, total: 16750149632).
+[W1106 19:24:48.554021230 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 16711680, total: 16750149632).
+[W1106 19:24:50.345967798 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 2031616, total: 16750149632).
+[W1106 19:24:56.806520600 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 10420224, total: 16750149632).
+[W1106 19:25:00.926021515 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 18808832, total: 16750149632).
+[W1106 19:25:09.197239377 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 4128768, total: 16750149632).
+[W1106 19:25:12.390318346 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 14614528, total: 16750149632).
+[W1106 19:25:19.895257311 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 6225920, total: 16750149632).
+[W1106 19:25:24.854984730 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 2097152 bytes (free: 2031616, total: 16750149632).
+[W1106 19:25:33.408308669 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 12517376, total: 16750149632).
+[W1106 19:25:39.792349591 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 12517376, total: 16750149632).
+[W1106 19:25:43.826789574 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 14614528, total: 16750149632).
+[W1106 19:25:50.761481838 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 2031616, total: 16750149632).
+[W1106 19:25:53.026686120 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 12517376, total: 16750149632).
+[W1106 19:26:00.498886005 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 18808832, total: 16750149632).
+[W1106 19:26:04.475203159 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 14614528, total: 16750149632).
+[W1106 19:26:12.522157021 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 4128768, total: 16750149632).
+[W1106 19:26:15.645444804 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 12517376, total: 16750149632).
+[W1106 19:26:22.774718360 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 10420224, total: 16750149632).
+[W1106 19:26:26.699783546 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 12517376, total: 16750149632).
+[W1106 19:26:34.536287634 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 8323072, total: 16750149632).
+[W1106 19:26:37.677489055 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 12517376, total: 16750149632).
+[W1106 19:26:43.087710892 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 8323072, total: 16750149632).
+[W1106 19:26:47.001760036 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 10420224, total: 16750149632).
+[W1106 19:26:54.163135657 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 6225920, total: 16750149632).
+[W1106 19:26:58.199477473 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 8323072, total: 16750149632).

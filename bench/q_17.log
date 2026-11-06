@@ -1,0 +1,52 @@
+Parsed Configuration:
+model_name: /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d
+dataset_path: data_wendler/word_list.csv
+langs: fr,de,ru,es
+latent_lang: en
+direction: first
+write_prompt: own
+grid: full
+perms: 
+max_perms: 12
+cfg_chunk: 32
+inflight: 2
+word_chunk: 1000
+devices: 1,2
+max_new: 24
+out: out_v2
+seed: 42
+shuffle_path: bench/orig_l2_7b.csv.shuffle.pt
+tag: ctlzh
+dtype: bfloat16
+max_mem_gb: 0.0
+layer_split: 1.15,1
+mode: swap
+alpha: 2.0
+start_step: 3
+shots: 4
+exclude_latent: False
+known: True
+loaded /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d in 6.0s  layers=32 devs=['cuda:1', 'cuda:2']
+[1/12] fr->de | ru->es: 11.4s (prefill 1.5, clean 0.5, sweep 9.4) clean exact 0.80 orig 0.86; best steer_to_exact 0.40 @ [0,20)
+[2/12] fr->de | es->ru: 10.7s (prefill 0.6, clean 0.3, sweep 9.8) clean exact 0.80 orig 0.86; best steer_to_exact 0.31 @ [15,20)
+[3/12] fr->ru | de->es: 10.3s (prefill 1.2, clean 0.4, sweep 8.8) clean exact 0.75 orig 0.81; best steer_to_exact 0.41 @ [0,20)
+[4/12] fr->ru | es->de: 9.3s (prefill 0.6, clean 0.4, sweep 8.3) clean exact 0.75 orig 0.81; best steer_to_exact 0.35 @ [15,20)
+[5/12] fr->es | de->ru: 11.5s (prefill 1.2, clean 0.4, sweep 9.9) clean exact 0.83 orig 0.84; best steer_to_exact 0.32 @ [3,20)
+[6/12] fr->es | ru->de: 9.5s (prefill 0.6, clean 0.4, sweep 8.6) clean exact 0.83 orig 0.84; best steer_to_exact 0.32 @ [15,20)
+[7/12] de->fr | ru->es: 10.5s (prefill 1.2, clean 0.4, sweep 8.8) clean exact 0.83 orig 0.85; best steer_to_exact 0.42 @ [3,20)
+[8/12] de->fr | es->ru: 10.8s (prefill 0.6, clean 0.3, sweep 9.8) clean exact 0.83 orig 0.85; best steer_to_exact 0.30 @ [9,20)
+[9/12] de->ru | fr->es: 10.5s (prefill 1.2, clean 0.4, sweep 8.8) clean exact 0.83 orig 0.88; best steer_to_exact 0.38 @ [15,20)
+[10/12] de->ru | es->fr: 9.4s (prefill 0.6, clean 0.4, sweep 8.4) clean exact 0.83 orig 0.88; best steer_to_exact 0.35 @ [9,20)
+[11/12] de->es | fr->ru: 10.9s (prefill 1.2, clean 0.4, sweep 9.4) clean exact 0.83 orig 0.86; best steer_to_exact 0.31 @ [6,20)
+[12/12] de->es | ru->fr: 9.0s (prefill 0.6, clean 0.4, sweep 8.0) clean exact 0.83 orig 0.86; best steer_to_exact 0.31 @ [3,20)
+saved out_v2/Llama-2-7b-hf/steer_en_first_own_swap2_ctlzh.csv; total 130.0s
+PROFILE {'index': 2.7, 'rows_t0': 3702720, 'layers': 14.44, 'logits': 65.97, 'score': 4.43, 'rows_gen': 5874505, 'layers_gen': 15.88}
+peak GiB per device: [0.0, 9.78, 12.07] weights: [0.0, 6.65, 5.9]
+INFO:root:Not in an IPython environment: name 'get_ipython' is not defined
+`torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]
+Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.68s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  2.27s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  2.48s/it]
+[W1106 19:48:30.842513709 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 2031616, total: 16750149632).

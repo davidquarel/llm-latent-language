@@ -1,0 +1,5 @@
+{
+ "--write_prompt own --mode swap --alpha 3 --start_step 3 --grid full --shots 8 --dataset_path data_wendler/word_list_v2_en1tok.csv --word_chunk 120 --tag v2en1": "done",
+ "--write_prompt own --mode swap --alpha 3 --start_step 3 --grid full --shots 8 --dataset_path data_wendler/word_list_v2.csv --word_chunk 120 --direction mean --tag v2": "done",
+ "--write_prompt own --mode swap --alpha 3 --start_step 3 --grid full --shots 8 --dataset_path data_wendler/word_list_v2_en1tok.csv --word_chunk 120 --latent_lang fr --exclude_latent True --langs fr,de,ru,zh,ko --tag v2en1ctl": "done"
+}

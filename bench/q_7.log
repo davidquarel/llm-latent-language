@@ -1,0 +1,63 @@
+Parsed Configuration:
+model_name: /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d
+dataset_path: data_wendler/word_list.csv
+langs: fr,de,ru,zh
+latent_lang: en
+direction: first
+write_prompt: own
+grid: full
+perms: 
+max_perms: 0
+cfg_chunk: 32
+inflight: 2
+word_chunk: 1000
+devices: 1,2
+max_new: 24
+out: out_v2
+seed: 42
+shuffle_path: bench/orig_l2_7b.csv.shuffle.pt
+tag: 
+dtype: bfloat16
+max_mem_gb: 0.0
+layer_split: 1.15,1
+mode: remove
+alpha: 1.0
+start_step: 3
+shots: 4
+exclude_latent: False
+known: True
+loaded /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d in 6.0s  layers=32 devs=['cuda:1', 'cuda:2']
+[1/24] fr->de | ru->zh: 11.9s (prefill 1.4, clean 0.5, sweep 9.9) clean exact 0.80 orig 0.86; best steer_to_exact 0.00 @ [0,1)
+[2/24] fr->de | zh->ru: 10.6s (prefill 0.7, clean 0.3, sweep 9.6) clean exact 0.80 orig 0.86; best steer_to_exact 0.00 @ [0,1)
+[3/24] fr->ru | de->zh: 10.9s (prefill 1.2, clean 0.4, sweep 9.3) clean exact 0.75 orig 0.81; best steer_to_exact 0.01 @ [0,29)
+[4/24] fr->ru | zh->de: 8.9s (prefill 0.6, clean 0.4, sweep 7.9) clean exact 0.75 orig 0.81; best steer_to_exact 0.00 @ [0,1)
+[5/24] fr->zh | de->ru: 11.9s (prefill 1.2, clean 0.5, sweep 10.2) clean exact 0.62 orig 0.78; best steer_to_exact 0.01 @ [18,31)
+[6/24] fr->zh | ru->de: 9.6s (prefill 0.6, clean 0.5, sweep 8.5) clean exact 0.62 orig 0.78; best steer_to_exact 0.00 @ [0,1)
+[7/24] de->fr | ru->zh: 11.2s (prefill 1.3, clean 0.4, sweep 9.5) clean exact 0.83 orig 0.85; best steer_to_exact 0.00 @ [0,1)
+[8/24] de->fr | zh->ru: 10.7s (prefill 0.7, clean 0.3, sweep 9.7) clean exact 0.83 orig 0.85; best steer_to_exact 0.00 @ [0,1)
+[9/24] de->ru | fr->zh: 10.6s (prefill 1.2, clean 0.4, sweep 9.0) clean exact 0.83 orig 0.88; best steer_to_exact 0.00 @ [0,1)
+[10/24] de->ru | zh->fr: 8.9s (prefill 0.7, clean 0.4, sweep 7.7) clean exact 0.83 orig 0.88; best steer_to_exact 0.00 @ [0,1)
+[11/24] de->zh | fr->ru: 11.3s (prefill 1.2, clean 0.5, sweep 9.5) clean exact 0.62 orig 0.80; best steer_to_exact 0.00 @ [0,1)
+[12/24] de->zh | ru->fr: 9.0s (prefill 0.6, clean 0.5, sweep 7.8) clean exact 0.62 orig 0.80; best steer_to_exact 0.00 @ [0,1)
+[13/24] ru->fr | de->zh: 11.3s (prefill 1.3, clean 0.3, sweep 9.7) clean exact 0.81 orig 0.83; best steer_to_exact 0.01 @ [0,29)
+[14/24] ru->fr | zh->de: 8.8s (prefill 0.6, clean 0.3, sweep 7.9) clean exact 0.81 orig 0.83; best steer_to_exact 0.00 @ [0,1)
+[15/24] ru->de | fr->zh: 10.5s (prefill 1.3, clean 0.3, sweep 8.9) clean exact 0.86 orig 0.92; best steer_to_exact 0.00 @ [0,1)
+[16/24] ru->de | zh->fr: 8.6s (prefill 0.7, clean 0.3, sweep 7.6) clean exact 0.86 orig 0.92; best steer_to_exact 0.00 @ [0,1)
+[17/24] ru->zh | fr->de: 10.0s (prefill 1.2, clean 0.6, sweep 8.2) clean exact 0.58 orig 0.76; best steer_to_exact 0.00 @ [0,1)
+[18/24] ru->zh | de->fr: 8.8s (prefill 0.6, clean 0.5, sweep 7.6) clean exact 0.58 orig 0.76; best steer_to_exact 0.00 @ [0,1)
+[19/24] zh->fr | de->ru: 11.8s (prefill 1.3, clean 0.3, sweep 10.2) clean exact 0.76 orig 0.80; best steer_to_exact 0.01 @ [18,31)
+[20/24] zh->fr | ru->de: 9.4s (prefill 0.6, clean 0.3, sweep 8.5) clean exact 0.76 orig 0.80; best steer_to_exact 0.00 @ [0,1)
+[21/24] zh->de | fr->ru: 11.1s (prefill 1.3, clean 0.3, sweep 9.5) clean exact 0.67 orig 0.77; best steer_to_exact 0.00 @ [0,1)
+[22/24] zh->de | ru->fr: 8.7s (prefill 0.6, clean 0.3, sweep 7.8) clean exact 0.67 orig 0.77; best steer_to_exact 0.00 @ [0,1)
+[23/24] zh->ru | fr->de: 10.0s (prefill 1.3, clean 0.4, sweep 8.2) clean exact 0.71 orig 0.80; best steer_to_exact 0.00 @ [0,1)
+[24/24] zh->ru | de->fr: 8.7s (prefill 0.6, clean 0.4, sweep 7.6) clean exact 0.71 orig 0.80; best steer_to_exact 0.00 @ [0,1)
+saved out_v2/Llama-2-7b-hf/steer_en_first_own_remove1.csv; total 249.4s
+PROFILE {'index': 5.59, 'rows_t0': 7405440, 'layers': 25.78, 'logits': 129.87, 'score': 9.44, 'rows_gen': 10173643, 'layers_gen': 31.3}
+peak GiB per device: [0.0, 9.48, 11.83] weights: [0.0, 6.65, 5.9]
+INFO:root:Not in an IPython environment: name 'get_ipython' is not defined
+`torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]
+Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.72s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.30s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.51s/it]

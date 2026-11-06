@@ -1,0 +1,41 @@
+18:01:11 RUN 0 1,2 --write_prompt own --mode swap --alpha 1 --start_step 3 --grid full
+18:05:56 DONE 0 285s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own.csv; total 278.1s']
+18:05:56 RUN 1 1,2 --write_prompt own --mode swap --alpha 2 --start_step 3 --grid full
+18:10:39 DONE 1 283s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_swap2.csv; total 275.9s']
+18:10:39 RUN 2 1,2 --write_prompt own --mode patch --start_step 3 --grid full
+18:56:47 RUN 2 1,2 --write_prompt own --mode patch --start_step 3 --grid full
+19:00:56 DONE 2 249s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_patch1.csv; total 242.8s']
+19:00:56 RUN 3 1,2 --write_prompt own --mode patch_noen --start_step 3 --grid full
+19:05:08 DONE 3 252s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_patch_noen1.csv; total 246.1s']
+19:05:08 RUN 4 1,2 --write_prompt own --mode swap --alpha 3 --start_step 3 --grid full
+19:09:28 DONE 4 259s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_swap3.csv; total 253.2s']
+19:09:28 RUN 5 1,2 --write_prompt own --mode patch_en --alpha 1 --start_step 3 --grid full
+19:13:49 DONE 5 261s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_patch_en1.csv; total 254.7s']
+19:13:49 RUN 6 1,2 --write_prompt own --mode add --alpha 1 --start_step 3 --grid full
+19:18:15 DONE 6 266s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_add1.csv; total 260.2s']
+19:18:16 RUN 7 1,2 --write_prompt own --mode remove --start_step 3 --grid full
+19:22:31 DONE 7 256s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_remove1.csv; total 249.4s']
+19:22:31 RUN 8 1,2 --write_prompt own --mode swap --alpha 1 --start_step 3 --grid full --shots 8
+19:27:05 DONE 8 274s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_shots8.csv; total 267.6s']
+19:27:05 RUN 9 1,2 --write_prompt own --mode swap --alpha 1.5 --start_step 3 --grid full
+19:31:29 DONE 9 264s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_swap1.5.csv; total 257.8s']
+19:31:29 RUN 10 1,2 --write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,de,ru,zh,es --exclude_latent True --latent_lang fr --max_perms 12 --tag ctl
+19:33:52 DONE 10 143s ['saved out_v2/Llama-2-7b-hf/steer_fr_first_own_swap2_ctl.csv; total 136.5s']
+19:33:52 RUN 11 1,2 --write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs de,ru,zh,es --max_perms 12 --tag ctlfr
+19:36:15 DONE 11 142s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_swap2_ctlfr.csv; total 136.1s']
+19:36:15 RUN 12 1,2 --write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,de,ru,zh,es --exclude_latent True --latent_lang de --max_perms 12 --tag ctl
+19:38:37 DONE 12 142s ['saved out_v2/Llama-2-7b-hf/steer_de_first_own_swap2_ctl.csv; total 135.9s']
+19:38:37 RUN 13 1,2 --write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,ru,zh,es --max_perms 12 --tag ctlde
+19:40:58 DONE 13 141s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_swap2_ctlde.csv; total 135.0s']
+19:40:58 RUN 14 1,2 --write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,de,ru,zh,es --exclude_latent True --latent_lang ru --max_perms 12 --tag ctl
+19:43:17 DONE 14 139s ['saved out_v2/Llama-2-7b-hf/steer_ru_first_own_swap2_ctl.csv; total 132.2s']
+19:43:17 RUN 15 1,2 --write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,de,zh,es --max_perms 12 --tag ctlru
+19:45:35 DONE 15 138s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_swap2_ctlru.csv; total 131.6s']
+19:45:35 RUN 16 1,2 --write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,de,ru,zh,es --exclude_latent True --latent_lang zh --max_perms 12 --tag ctl
+19:47:53 DONE 16 138s ['saved out_v2/Llama-2-7b-hf/steer_zh_first_own_swap2_ctl.csv; total 131.9s']
+19:47:53 RUN 17 1,2 --write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,de,ru,es --max_perms 12 --tag ctlzh
+19:50:09 DONE 17 136s ['saved out_v2/Llama-2-7b-hf/steer_en_first_own_swap2_ctlzh.csv; total 130.0s']
+19:50:09 RUN 18 1,2 --write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --dataset_path data_wendler/word_list_v2.csv --tag v2
+19:50:31 FAILED 18 22s ['torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 94.00 MiB. GPU 2 has a total capacity of 15.60 GiB of which 49.94 MiB is free. Including non-PyTorch memory, this process has 15.53 GiB memory in use. Of the allocated memory 14.58 GiB is allocated by PyTorch, and 747.67 MiB is reserved by PyTorch but unallocated.']
+19:50:31 RUN 19 1,2 --write_prompt own --mode swap --alpha 1 --start_step 3 --grid full --dataset_path data_wendler/word_list_v2.csv --tag v2
+19:50:53 FAILED 19 22s ['torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 94.00 MiB. GPU 2 has a total capacity of 15.60 GiB of which 49.94 MiB is free. Including non-PyTorch memory, this process has 15.53 GiB memory in use. Of the allocated memory 14.58 GiB is allocated by PyTorch, and 747.67 MiB is reserved by PyTorch but unallocated.']

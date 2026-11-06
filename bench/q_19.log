@@ -1,0 +1,57 @@
+Parsed Configuration:
+model_name: /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d
+dataset_path: data_wendler/word_list_v2.csv
+langs: fr,de,ru,zh
+latent_lang: en
+direction: first
+write_prompt: own
+grid: full
+perms: 
+max_perms: 0
+cfg_chunk: 32
+inflight: 2
+word_chunk: 1000
+devices: 1,2
+max_new: 24
+out: out_v2
+seed: 42
+shuffle_path: bench/orig_l2_7b.csv.shuffle.pt
+tag: v2
+dtype: bfloat16
+max_mem_gb: 0.0
+layer_split: 1.15,1
+mode: swap
+alpha: 1.0
+start_step: 3
+shots: 4
+exclude_latent: False
+known: True
+loaded /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d in 6.0s  layers=32 devs=['cuda:1', 'cuda:2']
+INFO:root:Not in an IPython environment: name 'get_ipython' is not defined
+`torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]
+Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.70s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  2.28s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  2.50s/it]
+[W1106 19:50:49.186617684 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 20905984, total: 16750149632).
+[W1106 19:50:51.631155267 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 1 while trying to map 20971520 bytes (free: 18808832, total: 16750149632).
+[W1106 19:50:51.785318657 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 10420224, total: 16750149632).
+[W1106 19:50:51.067636043 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 10420224, total: 16750149632).
+[W1106 19:50:52.258890579 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 10420224, total: 16750149632).
+[W1106 19:50:52.264098191 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 2 while trying to map 20971520 bytes (free: 10420224, total: 16750149632).
+Traceback (most recent call last):
+  File "/workspace/HOME/guest/david_quarel/llm-latent-language-wip-84eef78/fast_steer.py", line 961, in <module>
+    main(cfg)
+  File "/workspace/HOME/guest/david_quarel/llm-latent-language-wip-84eef78/fast_steer.py", line 907, in main
+    for (c0, w0), r in zip(jobs, run_pipelined(gens, cfg.inflight)):
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/HOME/guest/david_quarel/llm-latent-language-wip-84eef78/fast_steer.py", line 465, in run_pipelined
+    next(g)
+  File "/workspace/HOME/guest/david_quarel/llm-latent-language-wip-84eef78/fast_steer.py", line 599, in engine_gen
+    attn = M.attend(l, q, k, v, prev_k, prev_v, ctx, packs[(l, "wpos")], plan_meta[l])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/HOME/guest/david_quarel/llm-latent-language-wip-84eef78/fast_steer.py", line 233, in attend
+    og = og.view(Wc, Hkv, maxcnt, g, dh).permute(0, 2, 1, 3, 4).reshape(Wc * maxcnt, Hkv, g, dh)[wpos]
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 94.00 MiB. GPU 2 has a total capacity of 15.60 GiB of which 49.94 MiB is free. Including non-PyTorch memory, this process has 15.53 GiB memory in use. Of the allocated memory 14.58 GiB is allocated by PyTorch, and 747.67 MiB is reserved by PyTorch but unallocated.

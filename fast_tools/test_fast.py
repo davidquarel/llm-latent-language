@@ -30,7 +30,9 @@ rr = fs.run_engine(M, rctx, [(nL, nL + 1)], torch.arange(W), None, sc, max_new=8
 hf_arg = rctx.hf_logits.argmax(-1)
 print("clean first-token agree with HF:", (rr["first_tok"][0] == hf_arg).float().mean().item())
 c_new = torch.einsum("lwd,wd->lw", rr["resid"], u)
-steer = fs.SteerSpec(u_old=u[perm], u_new=u, c_new=c_new)
+MODE = os.environ.get("MODE", "swap"); ALPHA = float(os.environ.get("ALPHA", "1"))
+steer = fs.SteerSpec(u_old=u[perm], u_new=u, c_new=c_new, mode=MODE, alpha=ALPHA, r_read=rr["resid"])
+print("mode", MODE, "alpha", ALPHA)
 
 # reference: full-sequence HF greedy decode with hooks at the query position
 p_ids, s_ids, _ = fs.tokenize_with_prompt(tok, prompt, gen_common_suffixes(wdf[src2], src2, dest2))
@@ -40,10 +42,11 @@ def ref_decode(w, s, e, steps):
     for l in range(s, min(e, nL)):
         def hk(mod, inp, out, l=l):
             h = out[0] if isinstance(out, tuple) else out
-            x = h[0, qi].float()
-            uo, un = steer.u_old[w].to(x.device), steer.u_new[w].to(x.device)
-            x = x - (x @ uo) * uo + steer.c_new[l, w].to(x.device) * un
-            h[0, qi] = x.to(h.dtype)
+            x = h[0, qi].float()[None]
+            uo, un = steer.u_old[w].to(x.device)[None], steer.u_new[w].to(x.device)[None]
+            cn = steer.c_new[l, w].to(x.device)[None]
+            x = fs.apply_intervention(steer.mode, steer.alpha, x, uo, un, cn, steer.r_read[l, w].to(x.device)[None])
+            h[0, qi] = x[0].to(h.dtype)
             return out
         hooks.append(M.layers[l].register_forward_hook(hk))
     toks = []
@@ -76,8 +79,9 @@ for ci, (s, e) in enumerate(configs):
             for l in range(s, min(e, nL)):
                 def hk(mod, inp, out, l=l, w=w):
                     h = out[0] if isinstance(out, tuple) else out
-                    x = h[0, qi].float(); uo, un = steer.u_old[w].to(x.device), steer.u_new[w].to(x.device)
-                    h[0, qi] = (x - (x @ uo) * uo + steer.c_new[l, w].to(x.device) * un).to(h.dtype); return out
+                    x = h[0, qi].float()[None]; uo, un = steer.u_old[w].to(x.device)[None], steer.u_new[w].to(x.device)[None]
+                    x = fs.apply_intervention(steer.mode, steer.alpha, x, uo, un, steer.c_new[l, w].to(x.device)[None], steer.r_read[l, w].to(x.device)[None])
+                    h[0, qi] = x[0].to(h.dtype); return out
                 hooks.append(M.layers[l].register_forward_hook(hk))
             lg = m(input_ids=torch.tensor([seq + r[:d]], device=M.dev[0])).logits[0, -1].float()
             for h in hooks: h.remove()

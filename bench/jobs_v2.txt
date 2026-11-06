@@ -1,0 +1,21 @@
+# coarse start grid (every 3rd start; end layers dense, grid full) unless noted
+--write_prompt own --mode swap --alpha 1 --start_step 3 --grid full
+--write_prompt own --mode swap --alpha 2 --start_step 3 --grid full
+--write_prompt own --mode patch --start_step 3 --grid full
+--write_prompt own --mode patch_noen --start_step 3 --grid full
+--write_prompt own --mode swap --alpha 3 --start_step 3 --grid full
+--write_prompt own --mode patch_en --alpha 1 --start_step 3 --grid full
+--write_prompt own --mode add --alpha 1 --start_step 3 --grid full
+--write_prompt own --mode remove --start_step 3 --grid full
+--write_prompt own --mode swap --alpha 1 --start_step 3 --grid full --shots 8
+--write_prompt own --mode swap --alpha 1.5 --start_step 3 --grid full
+--write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,de,ru,zh,es --exclude_latent True --latent_lang fr --max_perms 12 --tag ctl
+--write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs de,ru,zh,es --max_perms 12 --tag ctlfr
+--write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,de,ru,zh,es --exclude_latent True --latent_lang de --max_perms 12 --tag ctl
+--write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,ru,zh,es --max_perms 12 --tag ctlde
+--write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,de,ru,zh,es --exclude_latent True --latent_lang ru --max_perms 12 --tag ctl
+--write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,de,zh,es --max_perms 12 --tag ctlru
+--write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,de,ru,zh,es --exclude_latent True --latent_lang zh --max_perms 12 --tag ctl
+--write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --langs fr,de,ru,es --max_perms 12 --tag ctlzh
+--write_prompt own --mode swap --alpha 2 --start_step 3 --grid full --dataset_path data_wendler/word_list_v2.csv --tag v2
+--write_prompt own --mode swap --alpha 1 --start_step 3 --grid full --dataset_path data_wendler/word_list_v2.csv --tag v2
