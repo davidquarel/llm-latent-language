@@ -16,14 +16,19 @@ def free_mib():
     out = subprocess.run(["nvidia-smi", "--query-gpu=memory.free", "--format=csv,noheader,nounits"], capture_output=True, text=True).stdout
     return [int(x) for x in out.split()]
 
+# Respect GPU reservations: any GPU_RESERVATION.md in the repo root disables CFG2/CFG3 (GPUs 1,2).
+RESERVED = os.path.exists("GPU_RESERVATION.md")
+if RESERVED:
+    print("GPU_RESERVATION.md present: only GPU 0 (CFG1) will be used", flush=True)
+
 for i, j in enumerate(jobs):
     if state.get(j) == "done":
         continue
     while True:
         f = free_mib()
-        if all(x > 15000 for x in f):
+        if not RESERVED and all(x > 15000 for x in f):
             cfg = CFG3; break
-        if f[1] > 15000 and f[2] > 15000:
+        if not RESERVED and f[1] > 15000 and f[2] > 15000:
             cfg = CFG2; break
         if f[0] > 15500:
             cfg = CFG1; break
