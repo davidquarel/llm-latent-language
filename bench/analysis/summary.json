@@ -1,0 +1,59 @@
+{
+ "Llama-2-7b-hf/steer_en_first_orig": {
+  "model": "Llama-2-7b-hf",
+  "n_perms": 24,
+  "clean_exact": 0.7374686698118845,
+  "clean_orig": 0.8220551311969757,
+  "best_window_exact": [
+   7.0,
+   22.0
+  ],
+  "clean_exact@best_exact": 0.7374686698118845,
+  "steer_to_exact@best_exact": 0.14724310739741966,
+  "steer_from_exact@best_exact": 0.24310777025918162,
+  "steer_to_en_exact@best_exact": 0.23778195306658742,
+  "steer_from_en_exact@best_exact": 0.008458646712824662,
+  "steer_to_orig_acc@best_exact": 0.31234335744132596,
+  "steer_from_orig_acc@best_exact": 0.18076441157609222,
+  "steer_to_en_orig_acc@best_exact": 0.33114035303394,
+  "steer_from_en_orig_acc@best_exact": 0.04229323379695413,
+  "best_window_orig": [
+   15.0,
+   22.0
+  ],
+  "steer_to_orig_acc_at_best_orig": 0.31672932300716633,
+  "steer_to_exact_at_best_orig": 0.14567669116271034,
+  "by_dest2@best_exact": {
+   "de": {
+    "steer_to_exact": 0.158,
+    "steer_to_orig_acc": 0.371,
+    "steer_from_exact": 0.165,
+    "steer_from_orig_acc": 0.183,
+    "steer_to_en_exact": 0.332
+   },
+   "fr": {
+    "steer_to_exact": 0.195,
+    "steer_to_orig_acc": 0.365,
+    "steer_from_exact": 0.198,
+    "steer_from_orig_acc": 0.237,
+    "steer_to_en_exact": 0.352
+   },
+   "ru": {
+    "steer_to_exact": 0.222,
+    "steer_to_orig_acc": 0.441,
+    "steer_from_exact": 0.188,
+    "steer_from_orig_acc": 0.221,
+    "steer_to_en_exact": 0.134
+   },
+   "zh": {
+    "steer_to_exact": 0.014,
+    "steer_to_orig_acc": 0.073,
+    "steer_from_exact": 0.421,
+    "steer_from_orig_acc": 0.083,
+    "steer_to_en_exact": 0.133
+   }
+  },
+  "sec_per_perm": 19.767597556114197,
+  "sec_total": 474.4223413467407
+ }
+}

@@ -46,5 +46,5 @@ class AutoTLTokenizer:
 
         return model.tokenizer
 # %%
-AutoTLTokenizer.from_pretrained("meta-llama/Llama-3.2-3B")
+# AutoTLTokenizer.from_pretrained("meta-llama/Llama-3.2-3B")  # import-time side effect; needs gated access
 # %%
