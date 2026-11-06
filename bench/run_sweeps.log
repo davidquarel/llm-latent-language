@@ -1,0 +1,287 @@
++ P=/workspace/HOME/guest/david_quarel/ARENA_3.0/.venv/bin/python
++ A='--model_name /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d --devices 0,1,2 --inflight 3 --cfg_chunk 32 --layer_split 1.4,1,0.75 --shuffle_path bench/orig_l2_7b.csv.shuffle.pt --out out_fast'
++ /workspace/HOME/guest/david_quarel/ARENA_3.0/.venv/bin/python fast_steer.py --model_name /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d --devices 0,1,2 --inflight 3 --cfg_chunk 32 --layer_split 1.4,1,0.75 --shuffle_path bench/orig_l2_7b.csv.shuffle.pt --out out_fast --latent_lang en --direction first --write_prompt orig
+INFO:root:Not in an IPython environment: name 'get_ipython' is not defined
+`torch_dtype` is deprecated! Use `dtype` instead!
+Parsed Configuration:
+model_name: /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d
+dataset_path: data_wendler/word_list.csv
+langs: fr,de,ru,zh
+latent_lang: en
+direction: first
+write_prompt: orig
+grid: orig
+perms: 
+max_perms: 0
+cfg_chunk: 32
+inflight: 3
+word_chunk: 1000
+devices: 0,1,2
+max_new: 24
+out: out_fast
+seed: 42
+shuffle_path: bench/orig_l2_7b.csv.shuffle.pt
+tag: 
+dtype: bfloat16
+max_mem_gb: 0.0
+layer_split: 1.4,1,0.75
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.76s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.32s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.53s/it]
+loaded /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d in 5.9s  layers=32 devs=['cuda:0', 'cuda:1', 'cuda:2']
+[1/24] fr->de | ru->zh: 25.0s (prefill 1.4, clean 0.6, sweep 23.0) clean exact 0.80 orig 0.86; best steer_to_exact 0.02 @ [0,23)
+[W1106 13:53:00.546907604 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 39845888 bytes (free: 8323072, total: 16750149632).
+[W1106 13:53:04.159572492 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 2097152 bytes (free: 2031616, total: 16750149632).
+[2/24] fr->de | zh->ru: 19.7s (prefill 0.9, clean 0.3, sweep 18.4) clean exact 0.80 orig 0.86; best steer_to_exact 0.20 @ [3,22)
+[3/24] fr->ru | de->zh: 23.0s (prefill 1.2, clean 0.3, sweep 21.5) clean exact 0.75 orig 0.81; best steer_to_exact 0.05 @ [0,21)
+[4/24] fr->ru | zh->de: 18.8s (prefill 0.6, clean 0.4, sweep 17.8) clean exact 0.75 orig 0.81; best steer_to_exact 0.17 @ [2,22)
+[5/24] fr->zh | de->ru: 20.4s (prefill 1.2, clean 0.5, sweep 18.8) clean exact 0.62 orig 0.78; best steer_to_exact 0.20 @ [0,22)
+[6/24] fr->zh | ru->de: 19.7s (prefill 0.6, clean 0.5, sweep 18.6) clean exact 0.62 orig 0.78; best steer_to_exact 0.17 @ [17,22)
+[7/24] de->fr | ru->zh: 24.1s (prefill 1.2, clean 0.4, sweep 22.5) clean exact 0.83 orig 0.85; best steer_to_exact 0.05 @ [2,22)
+[8/24] de->fr | zh->ru: 19.9s (prefill 0.7, clean 0.3, sweep 18.9) clean exact 0.83 orig 0.85; best steer_to_exact 0.24 @ [4,22)
+[9/24] de->ru | fr->zh: 24.3s (prefill 1.2, clean 0.4, sweep 22.6) clean exact 0.83 orig 0.88; best steer_to_exact 0.02 @ [3,23)
+[10/24] de->ru | zh->fr: 17.0s (prefill 0.7, clean 0.4, sweep 15.9) clean exact 0.83 orig 0.88; best steer_to_exact 0.23 @ [16,21)
+[11/24] de->zh | fr->ru: 21.0s (prefill 1.2, clean 0.5, sweep 19.2) clean exact 0.62 orig 0.80; best steer_to_exact 0.22 @ [14,22)
+[12/24] de->zh | ru->fr: 18.5s (prefill 0.6, clean 0.5, sweep 17.4) clean exact 0.62 orig 0.80; best steer_to_exact 0.21 @ [1,22)
+[13/24] ru->fr | de->zh: 23.8s (prefill 1.2, clean 0.3, sweep 22.3) clean exact 0.81 orig 0.83; best steer_to_exact 0.04 @ [2,23)
+[14/24] ru->fr | zh->de: 17.1s (prefill 0.6, clean 0.3, sweep 16.2) clean exact 0.81 orig 0.83; best steer_to_exact 0.18 @ [1,22)
+[W1106 13:57:30.780978121 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 62914560 bytes (free: 16711680, total: 16750149632).
+[15/24] ru->de | fr->zh: 24.4s (prefill 1.2, clean 0.3, sweep 22.9) clean exact 0.86 orig 0.92; best steer_to_exact 0.02 @ [0,23)
+[16/24] ru->de | zh->fr: 16.3s (prefill 0.7, clean 0.3, sweep 15.3) clean exact 0.86 orig 0.92; best steer_to_exact 0.25 @ [18,22)
+[17/24] ru->zh | fr->de: 19.0s (prefill 1.2, clean 0.5, sweep 17.3) clean exact 0.58 orig 0.76; best steer_to_exact 0.17 @ [3,21)
+[18/24] ru->zh | de->fr: 16.8s (prefill 0.6, clean 0.5, sweep 15.7) clean exact 0.58 orig 0.76; best steer_to_exact 0.20 @ [1,22)
+[19/24] zh->fr | de->ru: 20.2s (prefill 1.3, clean 0.3, sweep 18.6) clean exact 0.76 orig 0.80; best steer_to_exact 0.28 @ [8,22)
+[20/24] zh->fr | ru->de: 17.3s (prefill 0.6, clean 0.3, sweep 16.4) clean exact 0.76 orig 0.80; best steer_to_exact 0.16 @ [0,22)
+[21/24] zh->de | fr->ru: 18.2s (prefill 1.2, clean 0.3, sweep 16.7) clean exact 0.67 orig 0.77; best steer_to_exact 0.23 @ [0,22)
+[22/24] zh->de | ru->fr: 16.6s (prefill 0.6, clean 0.3, sweep 15.7) clean exact 0.67 orig 0.77; best steer_to_exact 0.21 @ [4,22)
+[23/24] zh->ru | fr->de: 17.1s (prefill 1.3, clean 0.4, sweep 15.4) clean exact 0.71 orig 0.80; best steer_to_exact 0.14 @ [17,21)
+[24/24] zh->ru | de->fr: 16.0s (prefill 0.6, clean 0.4, sweep 15.0) clean exact 0.71 orig 0.80; best steer_to_exact 0.22 @ [12,21)
+saved out_fast/Llama-2-7b-hf/steer_en_first_orig.csv; total 480.6s
+PROFILE {'index': 15.37, 'rows_t0': 19777632, 'layers': 17.09, 'logits': 309.82, 'score': 28.92, 'rows_gen': 33188191, 'layers_gen': 74.3}
+peak GiB per device: [8.72, 8.79, 9.44] weights: [5.52, 3.77, 3.26]
++ /workspace/HOME/guest/david_quarel/ARENA_3.0/.venv/bin/python fast_steer.py --model_name /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d --devices 0,1,2 --inflight 3 --cfg_chunk 32 --layer_split 1.4,1,0.75 --shuffle_path bench/orig_l2_7b.csv.shuffle.pt --out out_fast --latent_lang es --direction first --write_prompt orig
+INFO:root:Not in an IPython environment: name 'get_ipython' is not defined
+`torch_dtype` is deprecated! Use `dtype` instead!
+Parsed Configuration:
+model_name: /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d
+dataset_path: data_wendler/word_list.csv
+langs: fr,de,ru,zh
+latent_lang: es
+direction: first
+write_prompt: orig
+grid: orig
+perms: 
+max_perms: 0
+cfg_chunk: 32
+inflight: 3
+word_chunk: 1000
+devices: 0,1,2
+max_new: 24
+out: out_fast
+seed: 42
+shuffle_path: bench/orig_l2_7b.csv.shuffle.pt
+tag: 
+dtype: bfloat16
+max_mem_gb: 0.0
+layer_split: 1.4,1,0.75
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.73s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.30s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.52s/it]
+loaded /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d in 5.9s  layers=32 devs=['cuda:0', 'cuda:1', 'cuda:2']
+[1/24] fr->de | ru->zh: 25.4s (prefill 1.4, clean 0.6, sweep 23.5) clean exact 0.80 orig 0.86; best steer_to_exact 0.01 @ [0,21)
+[W1106 14:01:07.924989000 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 39845888 bytes (free: 4128768, total: 16750149632).
+[W1106 14:01:12.631758974 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 2097152 bytes (free: 2031616, total: 16750149632).
+[2/24] fr->de | zh->ru: 20.7s (prefill 0.9, clean 0.3, sweep 19.5) clean exact 0.80 orig 0.86; best steer_to_exact 0.01 @ [0,23)
+[3/24] fr->ru | de->zh: 22.4s (prefill 1.2, clean 0.4, sweep 20.8) clean exact 0.75 orig 0.81; best steer_to_exact 0.00 @ [0,1)
+[4/24] fr->ru | zh->de: 19.4s (prefill 0.6, clean 0.4, sweep 18.4) clean exact 0.75 orig 0.81; best steer_to_exact 0.01 @ [0,20)
+[5/24] fr->zh | de->ru: 21.5s (prefill 1.2, clean 0.5, sweep 19.8) clean exact 0.62 orig 0.78; best steer_to_exact 0.02 @ [0,23)
+[6/24] fr->zh | ru->de: 20.3s (prefill 0.6, clean 0.5, sweep 19.2) clean exact 0.62 orig 0.78; best steer_to_exact 0.02 @ [0,23)
+[7/24] de->fr | ru->zh: 24.1s (prefill 1.2, clean 0.4, sweep 22.5) clean exact 0.83 orig 0.85; best steer_to_exact 0.01 @ [0,22)
+[8/24] de->fr | zh->ru: 20.9s (prefill 0.7, clean 0.3, sweep 19.9) clean exact 0.83 orig 0.85; best steer_to_exact 0.01 @ [0,23)
+[9/24] de->ru | fr->zh: 24.8s (prefill 1.2, clean 0.4, sweep 23.1) clean exact 0.83 orig 0.88; best steer_to_exact 0.01 @ [19,30)
+[10/24] de->ru | zh->fr: 17.2s (prefill 0.7, clean 0.4, sweep 16.1) clean exact 0.83 orig 0.88; best steer_to_exact 0.03 @ [0,22)
+[11/24] de->zh | fr->ru: 18.9s (prefill 1.2, clean 0.5, sweep 17.1) clean exact 0.62 orig 0.80; best steer_to_exact 0.02 @ [0,23)
+[12/24] de->zh | ru->fr: 18.7s (prefill 0.6, clean 0.5, sweep 17.5) clean exact 0.62 orig 0.80; best steer_to_exact 0.03 @ [0,23)
+[13/24] ru->fr | de->zh: 23.7s (prefill 1.2, clean 0.3, sweep 22.2) clean exact 0.81 orig 0.83; best steer_to_exact 0.00 @ [0,1)
+[W1106 14:05:20.267532408 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 46137344 bytes (free: 12517376, total: 16750149632).
+[W1106 14:05:22.890218170 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 132120576 bytes (free: 127860736, total: 16750149632).
+[14/24] ru->fr | zh->de: 17.7s (prefill 0.9, clean 0.3, sweep 16.5) clean exact 0.81 orig 0.83; best steer_to_exact 0.02 @ [0,22)
+[15/24] ru->de | fr->zh: 24.5s (prefill 1.2, clean 0.3, sweep 22.9) clean exact 0.86 orig 0.92; best steer_to_exact 0.01 @ [0,31)
+[16/24] ru->de | zh->fr: 16.3s (prefill 0.7, clean 0.3, sweep 15.3) clean exact 0.86 orig 0.92; best steer_to_exact 0.04 @ [4,31)
+[17/24] ru->zh | fr->de: 19.3s (prefill 1.2, clean 0.5, sweep 17.5) clean exact 0.58 orig 0.76; best steer_to_exact 0.02 @ [4,23)
+[18/24] ru->zh | de->fr: 17.5s (prefill 0.6, clean 0.5, sweep 16.4) clean exact 0.58 orig 0.76; best steer_to_exact 0.05 @ [14,23)
+[19/24] zh->fr | de->ru: 20.8s (prefill 1.3, clean 0.3, sweep 19.2) clean exact 0.76 orig 0.80; best steer_to_exact 0.02 @ [0,21)
+[20/24] zh->fr | ru->de: 18.2s (prefill 0.6, clean 0.3, sweep 17.3) clean exact 0.76 orig 0.80; best steer_to_exact 0.02 @ [0,23)
+[21/24] zh->de | fr->ru: 18.6s (prefill 1.2, clean 0.3, sweep 17.1) clean exact 0.67 orig 0.77; best steer_to_exact 0.01 @ [0,21)
+[22/24] zh->de | ru->fr: 16.7s (prefill 0.6, clean 0.3, sweep 15.7) clean exact 0.67 orig 0.77; best steer_to_exact 0.05 @ [5,22)
+[23/24] zh->ru | fr->de: 17.2s (prefill 1.3, clean 0.4, sweep 15.6) clean exact 0.71 orig 0.80; best steer_to_exact 0.02 @ [0,23)
+[24/24] zh->ru | de->fr: 15.8s (prefill 0.6, clean 0.4, sweep 14.8) clean exact 0.71 orig 0.80; best steer_to_exact 0.05 @ [0,22)
+saved out_fast/Llama-2-7b-hf/steer_es_first_orig.csv; total 486.7s
+PROFILE {'index': 15.63, 'rows_t0': 19777632, 'layers': 17.03, 'logits': 316.78, 'score': 28.32, 'rows_gen': 32849082, 'layers_gen': 72.97}
+peak GiB per device: [8.58, 8.72, 9.51] weights: [5.52, 3.77, 3.26]
++ /workspace/HOME/guest/david_quarel/ARENA_3.0/.venv/bin/python fast_steer.py --model_name /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d --devices 0,1,2 --inflight 3 --cfg_chunk 32 --layer_split 1.4,1,0.75 --shuffle_path bench/orig_l2_7b.csv.shuffle.pt --out out_fast --latent_lang en --direction first --write_prompt own
+INFO:root:Not in an IPython environment: name 'get_ipython' is not defined
+`torch_dtype` is deprecated! Use `dtype` instead!
+Parsed Configuration:
+model_name: /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d
+dataset_path: data_wendler/word_list.csv
+langs: fr,de,ru,zh
+latent_lang: en
+direction: first
+write_prompt: own
+grid: orig
+perms: 
+max_perms: 0
+cfg_chunk: 32
+inflight: 3
+word_chunk: 1000
+devices: 0,1,2
+max_new: 24
+out: out_fast
+seed: 42
+shuffle_path: bench/orig_l2_7b.csv.shuffle.pt
+tag: 
+dtype: bfloat16
+max_mem_gb: 0.0
+layer_split: 1.4,1,0.75
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.74s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.30s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.52s/it]
+[W1106 14:08:57.044165215 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 247463936 bytes (free: 199163904, total: 16750149632).
+loaded /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d in 5.9s  layers=32 devs=['cuda:0', 'cuda:1', 'cuda:2']
+[1/24] fr->de | ru->zh: 22.9s (prefill 1.4, clean 0.6, sweep 20.9) clean exact 0.80 orig 0.86; best steer_to_exact 0.11 @ [3,22)
+[2/24] fr->de | zh->ru: 19.3s (prefill 0.7, clean 0.3, sweep 18.3) clean exact 0.80 orig 0.86; best steer_to_exact 0.21 @ [4,22)
+[3/24] fr->ru | de->zh: 22.0s (prefill 1.2, clean 0.3, sweep 20.5) clean exact 0.75 orig 0.81; best steer_to_exact 0.11 @ [0,22)
+[4/24] fr->ru | zh->de: 17.6s (prefill 0.6, clean 0.4, sweep 16.6) clean exact 0.75 orig 0.81; best steer_to_exact 0.27 @ [0,21)
+[5/24] fr->zh | de->ru: 21.0s (prefill 1.2, clean 0.5, sweep 19.3) clean exact 0.62 orig 0.78; best steer_to_exact 0.26 @ [14,22)
+[6/24] fr->zh | ru->de: 18.0s (prefill 0.6, clean 0.5, sweep 17.0) clean exact 0.62 orig 0.78; best steer_to_exact 0.25 @ [0,21)
+[7/24] de->fr | ru->zh: 21.7s (prefill 1.2, clean 0.4, sweep 20.1) clean exact 0.83 orig 0.85; best steer_to_exact 0.11 @ [13,22)
+[8/24] de->fr | zh->ru: 19.4s (prefill 0.7, clean 0.3, sweep 18.4) clean exact 0.83 orig 0.85; best steer_to_exact 0.21 @ [0,21)
+[9/24] de->ru | fr->zh: 19.4s (prefill 1.2, clean 0.4, sweep 17.8) clean exact 0.83 orig 0.88; best steer_to_exact 0.08 @ [0,22)
+[10/24] de->ru | zh->fr: 16.5s (prefill 0.7, clean 0.4, sweep 15.4) clean exact 0.83 orig 0.88; best steer_to_exact 0.26 @ [0,21)
+[11/24] de->zh | fr->ru: 19.7s (prefill 1.2, clean 0.5, sweep 17.9) clean exact 0.62 orig 0.80; best steer_to_exact 0.29 @ [0,22)
+[12/24] de->zh | ru->fr: 16.6s (prefill 0.6, clean 0.5, sweep 15.5) clean exact 0.62 orig 0.80; best steer_to_exact 0.27 @ [1,22)
+[13/24] ru->fr | de->zh: 21.8s (prefill 1.2, clean 0.3, sweep 20.3) clean exact 0.81 orig 0.83; best steer_to_exact 0.11 @ [0,21)
+[14/24] ru->fr | zh->de: 16.8s (prefill 0.6, clean 0.3, sweep 15.9) clean exact 0.81 orig 0.83; best steer_to_exact 0.32 @ [3,22)
+[15/24] ru->de | fr->zh: 19.3s (prefill 1.2, clean 0.3, sweep 17.7) clean exact 0.86 orig 0.92; best steer_to_exact 0.09 @ [14,22)
+[16/24] ru->de | zh->fr: 16.3s (prefill 0.7, clean 0.3, sweep 15.3) clean exact 0.86 orig 0.92; best steer_to_exact 0.26 @ [0,21)
+[17/24] ru->zh | fr->de: 18.1s (prefill 1.2, clean 0.5, sweep 16.4) clean exact 0.58 orig 0.76; best steer_to_exact 0.32 @ [4,22)
+[18/24] ru->zh | de->fr: 16.7s (prefill 0.6, clean 0.5, sweep 15.5) clean exact 0.58 orig 0.76; best steer_to_exact 0.31 @ [18,22)
+[19/24] zh->fr | de->ru: 20.9s (prefill 1.3, clean 0.3, sweep 19.3) clean exact 0.76 orig 0.80; best steer_to_exact 0.29 @ [0,22)
+[20/24] zh->fr | ru->de: 17.6s (prefill 0.6, clean 0.3, sweep 16.7) clean exact 0.76 orig 0.80; best steer_to_exact 0.27 @ [0,22)
+[21/24] zh->de | fr->ru: 19.6s (prefill 1.2, clean 0.3, sweep 18.1) clean exact 0.67 orig 0.77; best steer_to_exact 0.28 @ [2,22)
+[22/24] zh->de | ru->fr: 16.5s (prefill 0.6, clean 0.3, sweep 15.6) clean exact 0.67 orig 0.77; best steer_to_exact 0.25 @ [0,21)
+[23/24] zh->ru | fr->de: 17.8s (prefill 1.2, clean 0.4, sweep 16.1) clean exact 0.71 orig 0.80; best steer_to_exact 0.29 @ [0,22)
+[24/24] zh->ru | de->fr: 16.5s (prefill 0.6, clean 0.4, sweep 15.5) clean exact 0.71 orig 0.80; best steer_to_exact 0.32 @ [18,22)
+saved out_fast/Llama-2-7b-hf/steer_en_first_own.csv; total 458.1s
+PROFILE {'index': 14.41, 'rows_t0': 19777632, 'layers': 18.71, 'logits': 298.36, 'score': 24.21, 'rows_gen': 30200868, 'layers_gen': 67.55}
+peak GiB per device: [8.77, 8.57, 9.06] weights: [5.52, 3.77, 3.26]
++ /workspace/HOME/guest/david_quarel/ARENA_3.0/.venv/bin/python fast_steer.py --model_name /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d --devices 0,1,2 --inflight 3 --cfg_chunk 32 --layer_split 1.4,1,0.75 --shuffle_path bench/orig_l2_7b.csv.shuffle.pt --out out_fast --latent_lang es --direction mean --write_prompt orig
+INFO:root:Not in an IPython environment: name 'get_ipython' is not defined
+`torch_dtype` is deprecated! Use `dtype` instead!
+Parsed Configuration:
+model_name: /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d
+dataset_path: data_wendler/word_list.csv
+langs: fr,de,ru,zh
+latent_lang: es
+direction: mean
+write_prompt: orig
+grid: orig
+perms: 
+max_perms: 0
+cfg_chunk: 32
+inflight: 3
+word_chunk: 1000
+devices: 0,1,2
+max_new: 24
+out: out_fast
+seed: 42
+shuffle_path: bench/orig_l2_7b.csv.shuffle.pt
+tag: 
+dtype: bfloat16
+max_mem_gb: 0.0
+layer_split: 1.4,1,0.75
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.76s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.31s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.53s/it]
+loaded /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d in 5.9s  layers=32 devs=['cuda:0', 'cuda:1', 'cuda:2']
+[1/24] fr->de | ru->zh: 25.3s (prefill 1.4, clean 0.6, sweep 23.4) clean exact 0.80 orig 0.86; best steer_to_exact 0.01 @ [0,22)
+[W1106 14:17:05.447097459 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 39845888 bytes (free: 6225920, total: 16750149632).
+[W1106 14:17:09.116356257 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 2097152 bytes (free: 2031616, total: 16750149632).
+[2/24] fr->de | zh->ru: 20.5s (prefill 1.0, clean 0.3, sweep 19.2) clean exact 0.80 orig 0.86; best steer_to_exact 0.01 @ [0,23)
+[3/24] fr->ru | de->zh: 22.0s (prefill 1.2, clean 0.4, sweep 20.4) clean exact 0.75 orig 0.81; best steer_to_exact 0.00 @ [0,1)
+[4/24] fr->ru | zh->de: 19.1s (prefill 0.6, clean 0.4, sweep 18.1) clean exact 0.75 orig 0.81; best steer_to_exact 0.01 @ [0,20)
+[5/24] fr->zh | de->ru: 21.4s (prefill 1.2, clean 0.5, sweep 19.7) clean exact 0.62 orig 0.78; best steer_to_exact 0.02 @ [0,21)
+[6/24] fr->zh | ru->de: 20.1s (prefill 0.6, clean 0.5, sweep 19.0) clean exact 0.62 orig 0.78; best steer_to_exact 0.01 @ [0,20)
+[7/24] de->fr | ru->zh: 23.5s (prefill 1.2, clean 0.4, sweep 21.9) clean exact 0.83 orig 0.85; best steer_to_exact 0.01 @ [0,22)
+[8/24] de->fr | zh->ru: 20.7s (prefill 0.7, clean 0.3, sweep 19.7) clean exact 0.83 orig 0.85; best steer_to_exact 0.02 @ [10,23)
+[9/24] de->ru | fr->zh: 24.5s (prefill 1.2, clean 0.4, sweep 22.9) clean exact 0.83 orig 0.88; best steer_to_exact 0.01 @ [19,30)
+[10/24] de->ru | zh->fr: 16.8s (prefill 0.7, clean 0.4, sweep 15.6) clean exact 0.83 orig 0.88; best steer_to_exact 0.02 @ [0,22)
+[11/24] de->zh | fr->ru: 18.7s (prefill 1.2, clean 0.5, sweep 17.0) clean exact 0.62 orig 0.80; best steer_to_exact 0.02 @ [0,23)
+[12/24] de->zh | ru->fr: 18.5s (prefill 0.6, clean 0.5, sweep 17.4) clean exact 0.62 orig 0.80; best steer_to_exact 0.02 @ [0,22)
+[W1106 14:20:50.941592686 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 46137344 bytes (free: 35586048, total: 16750149632).
+[W1106 14:20:54.367370969 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 132120576 bytes (free: 104792064, total: 16750149632).
+[13/24] ru->fr | de->zh: 23.8s (prefill 1.5, clean 0.3, sweep 22.0) clean exact 0.81 orig 0.83; best steer_to_exact 0.00 @ [0,1)
+[14/24] ru->fr | zh->de: 16.8s (prefill 0.6, clean 0.3, sweep 15.9) clean exact 0.81 orig 0.83; best steer_to_exact 0.02 @ [0,22)
+[15/24] ru->de | fr->zh: 24.3s (prefill 1.2, clean 0.3, sweep 22.8) clean exact 0.86 orig 0.92; best steer_to_exact 0.01 @ [0,31)
+[16/24] ru->de | zh->fr: 16.1s (prefill 0.7, clean 0.3, sweep 15.1) clean exact 0.86 orig 0.92; best steer_to_exact 0.02 @ [0,22)
+[17/24] ru->zh | fr->de: 19.0s (prefill 1.2, clean 0.5, sweep 17.2) clean exact 0.58 orig 0.76; best steer_to_exact 0.02 @ [17,22)
+[18/24] ru->zh | de->fr: 16.5s (prefill 0.6, clean 0.5, sweep 15.4) clean exact 0.58 orig 0.76; best steer_to_exact 0.02 @ [0,22)
+[19/24] zh->fr | de->ru: 20.4s (prefill 1.3, clean 0.3, sweep 18.8) clean exact 0.76 orig 0.80; best steer_to_exact 0.02 @ [0,21)
+[20/24] zh->fr | ru->de: 17.3s (prefill 0.6, clean 0.3, sweep 16.4) clean exact 0.76 orig 0.80; best steer_to_exact 0.01 @ [0,20)
+[21/24] zh->de | fr->ru: 18.3s (prefill 1.2, clean 0.3, sweep 16.8) clean exact 0.67 orig 0.77; best steer_to_exact 0.01 @ [0,22)
+[22/24] zh->de | ru->fr: 16.4s (prefill 0.6, clean 0.3, sweep 15.5) clean exact 0.67 orig 0.77; best steer_to_exact 0.02 @ [0,22)
+[23/24] zh->ru | fr->de: 16.9s (prefill 1.3, clean 0.4, sweep 15.2) clean exact 0.71 orig 0.80; best steer_to_exact 0.02 @ [0,23)
+[24/24] zh->ru | de->fr: 15.4s (prefill 0.6, clean 0.4, sweep 14.4) clean exact 0.71 orig 0.80; best steer_to_exact 0.03 @ [0,22)
+saved out_fast/Llama-2-7b-hf/steer_es_mean_orig.csv; total 478.6s
+PROFILE {'index': 15.27, 'rows_t0': 19777632, 'layers': 17.35, 'logits': 310.09, 'score': 27.77, 'rows_gen': 31388867, 'layers_gen': 72.11}
+peak GiB per device: [8.51, 8.67, 9.36] weights: [5.52, 3.77, 3.26]
++ /workspace/HOME/guest/david_quarel/ARENA_3.0/.venv/bin/python fast_steer.py --model_name /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d --devices 0,1,2 --inflight 3 --cfg_chunk 32 --layer_split 1.4,1,0.75 --shuffle_path bench/orig_l2_7b.csv.shuffle.pt --out out_fast --latent_lang en --direction mean --write_prompt orig
+INFO:root:Not in an IPython environment: name 'get_ipython' is not defined
+`torch_dtype` is deprecated! Use `dtype` instead!
+Parsed Configuration:
+model_name: /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d
+dataset_path: data_wendler/word_list.csv
+langs: fr,de,ru,zh
+latent_lang: en
+direction: mean
+write_prompt: orig
+grid: orig
+perms: 
+max_perms: 0
+cfg_chunk: 32
+inflight: 3
+word_chunk: 1000
+devices: 0,1,2
+max_new: 24
+out: out_fast
+seed: 42
+shuffle_path: bench/orig_l2_7b.csv.shuffle.pt
+tag: 
+dtype: bfloat16
+max_mem_gb: 0.0
+layer_split: 1.4,1,0.75
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.75s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.31s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.52s/it]
+loaded /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d in 5.9s  layers=32 devs=['cuda:0', 'cuda:1', 'cuda:2']
+[1/24] fr->de | ru->zh: 25.5s (prefill 1.4, clean 0.6, sweep 23.5) clean exact 0.80 orig 0.86; best steer_to_exact 0.02 @ [0,23)
+[W1106 14:25:10.560898145 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 39845888 bytes (free: 8323072, total: 16750149632).
+[W1106 14:25:15.251222098 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 2097152 bytes (free: 2031616, total: 16750149632).
+[2/24] fr->de | zh->ru: 20.1s (prefill 0.9, clean 0.3, sweep 18.8) clean exact 0.80 orig 0.86; best steer_to_exact 0.20 @ [3,22)
+[3/24] fr->ru | de->zh: 23.6s (prefill 1.2, clean 0.3, sweep 22.0) clean exact 0.75 orig 0.81; best steer_to_exact 0.05 @ [0,21)
+[4/24] fr->ru | zh->de: 19.3s (prefill 0.6, clean 0.4, sweep 18.2) clean exact 0.75 orig 0.81; best steer_to_exact 0.17 @ [2,22)
+[5/24] fr->zh | de->ru: 20.8s (prefill 1.2, clean 0.5, sweep 19.1) clean exact 0.62 orig 0.78; best steer_to_exact 0.20 @ [0,22)
+[6/24] fr->zh | ru->de: 19.7s (prefill 0.6, clean 0.5, sweep 18.7) clean exact 0.62 orig 0.78; best steer_to_exact 0.17 @ [17,22)
+[7/24] de->fr | ru->zh: 24.2s (prefill 1.2, clean 0.4, sweep 22.6) clean exact 0.83 orig 0.85; best steer_to_exact 0.05 @ [2,22)
+[8/24] de->fr | zh->ru: 20.0s (prefill 0.7, clean 0.3, sweep 19.0) clean exact 0.83 orig 0.85; best steer_to_exact 0.24 @ [4,22)
+[9/24] de->ru | fr->zh: 24.4s (prefill 1.2, clean 0.4, sweep 22.7) clean exact 0.83 orig 0.88; best steer_to_exact 0.02 @ [3,23)
+[10/24] de->ru | zh->fr: 17.1s (prefill 0.7, clean 0.4, sweep 16.0) clean exact 0.83 orig 0.88; best steer_to_exact 0.23 @ [16,21)
+[11/24] de->zh | fr->ru: 21.0s (prefill 1.2, clean 0.5, sweep 19.3) clean exact 0.62 orig 0.80; best steer_to_exact 0.22 @ [14,22)
+[12/24] de->zh | ru->fr: 18.5s (prefill 0.6, clean 0.5, sweep 17.4) clean exact 0.62 orig 0.80; best steer_to_exact 0.21 @ [2,22)
+[13/24] ru->fr | de->zh: 23.9s (prefill 1.2, clean 0.3, sweep 22.3) clean exact 0.81 orig 0.83; best steer_to_exact 0.04 @ [2,23)
+[14/24] ru->fr | zh->de: 17.1s (prefill 0.6, clean 0.3, sweep 16.2) clean exact 0.81 orig 0.83; best steer_to_exact 0.18 @ [1,22)
+[W1106 14:29:43.242440004 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 62914560 bytes (free: 16711680, total: 16750149632).
+[15/24] ru->de | fr->zh: 24.5s (prefill 1.2, clean 0.3, sweep 22.9) clean exact 0.86 orig 0.92; best steer_to_exact 0.02 @ [0,23)
+[16/24] ru->de | zh->fr: 16.4s (prefill 0.7, clean 0.3, sweep 15.3) clean exact 0.86 orig 0.92; best steer_to_exact 0.25 @ [18,22)
+[17/24] ru->zh | fr->de: 19.1s (prefill 1.2, clean 0.5, sweep 17.3) clean exact 0.58 orig 0.76; best steer_to_exact 0.17 @ [3,21)
+[18/24] ru->zh | de->fr: 16.9s (prefill 0.6, clean 0.5, sweep 15.8) clean exact 0.58 orig 0.76; best steer_to_exact 0.20 @ [1,22)
+[19/24] zh->fr | de->ru: 20.2s (prefill 1.3, clean 0.3, sweep 18.6) clean exact 0.76 orig 0.80; best steer_to_exact 0.28 @ [8,22)
+[20/24] zh->fr | ru->de: 17.4s (prefill 0.6, clean 0.3, sweep 16.5) clean exact 0.76 orig 0.80; best steer_to_exact 0.16 @ [0,22)
+[21/24] zh->de | fr->ru: 18.4s (prefill 1.2, clean 0.3, sweep 16.8) clean exact 0.67 orig 0.77; best steer_to_exact 0.23 @ [0,22)
+[22/24] zh->de | ru->fr: 16.6s (prefill 0.6, clean 0.3, sweep 15.7) clean exact 0.67 orig 0.77; best steer_to_exact 0.21 @ [4,22)
+[23/24] zh->ru | fr->de: 17.2s (prefill 1.3, clean 0.4, sweep 15.5) clean exact 0.71 orig 0.80; best steer_to_exact 0.14 @ [17,21)
+[24/24] zh->ru | de->fr: 16.1s (prefill 0.6, clean 0.4, sweep 15.0) clean exact 0.71 orig 0.80; best steer_to_exact 0.22 @ [12,21)
+saved out_fast/Llama-2-7b-hf/steer_en_mean_orig.csv; total 484.0s
+PROFILE {'index': 15.55, 'rows_t0': 19777632, 'layers': 17.08, 'logits': 313.11, 'score': 28.78, 'rows_gen': 33145103, 'layers_gen': 74.26}
+peak GiB per device: [8.71, 8.79, 9.44] weights: [5.52, 3.77, 3.26]

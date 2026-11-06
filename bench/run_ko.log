@@ -1,0 +1,43 @@
++ P=/workspace/HOME/guest/david_quarel/ARENA_3.0/.venv/bin/python
++ A='--model_name /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d --devices 0,1,2 --inflight 3 --cfg_chunk 32 --layer_split 1.4,1,0.75 --shuffle_path bench/orig_l2_7b.csv.shuffle.pt --out out_fast'
++ /workspace/HOME/guest/david_quarel/ARENA_3.0/.venv/bin/python fast_steer.py --model_name /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d --devices 0,1,2 --inflight 3 --cfg_chunk 32 --layer_split 1.4,1,0.75 --shuffle_path bench/orig_l2_7b.csv.shuffle.pt --out out_fast --latent_lang en --direction first --write_prompt orig --tag ko --perms 'fr,de,ru,ko;de,fr,zh,ko;ru,zh,fr,ko;zh,ru,de,ko;fr,ko,de,zh;ko,fr,ru,de'
+INFO:root:Not in an IPython environment: name 'get_ipython' is not defined
+`torch_dtype` is deprecated! Use `dtype` instead!
+Parsed Configuration:
+model_name: /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d
+dataset_path: data_wendler/word_list.csv
+langs: fr,de,ru,zh
+latent_lang: en
+direction: first
+write_prompt: orig
+grid: orig
+perms: fr,de,ru,ko;de,fr,zh,ko;ru,zh,fr,ko;zh,ru,de,ko;fr,ko,de,zh;ko,fr,ru,de
+max_perms: 0
+cfg_chunk: 32
+inflight: 3
+word_chunk: 1000
+devices: 0,1,2
+max_new: 24
+out: out_fast
+seed: 42
+shuffle_path: bench/orig_l2_7b.csv.shuffle.pt
+tag: ko
+dtype: bfloat16
+max_mem_gb: 0.0
+layer_split: 1.4,1,0.75
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.74s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.30s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.52s/it]
+[W1106 14:33:28.173434341 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 2097152 bytes (free: 2031616, total: 16750149632).
+loaded /workspace/hfcache/hub/models--NousResearch--Llama-2-7b-hf/snapshots/8efe6c9b93655b934e27bd9981e3ec13e55aee9d in 5.9s  layers=32 devs=['cuda:0', 'cuda:1', 'cuda:2']
+[1/6] fr->de | ru->ko: 31.4s (prefill 1.4, clean 0.6, sweep 29.4) clean exact 0.80 orig 0.86; best steer_to_exact 0.01 @ [0,21)
+[2/6] de->fr | zh->ko: 29.8s (prefill 1.3, clean 0.4, sweep 28.1) clean exact 0.83 orig 0.85; best steer_to_exact 0.02 @ [0,20)
+[W1106 14:34:17.507510425 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 46137344 bytes (free: 14614528, total: 16750149632).
+[W1106 14:34:21.243163342 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 132120576 bytes (free: 90112000, total: 16750149632).
+[3/6] ru->zh | fr->ko: 27.6s (prefill 1.6, clean 0.6, sweep 25.5) clean exact 0.58 orig 0.76; best steer_to_exact 0.03 @ [18,22)
+[4/6] zh->ru | de->ko: 30.3s (prefill 1.3, clean 0.5, sweep 28.5) clean exact 0.71 orig 0.80; best steer_to_exact 0.02 @ [0,20)
+[5/6] fr->ko | de->zh: 21.7s (prefill 1.3, clean 0.8, sweep 19.7) clean exact 0.52 orig 0.70; best steer_to_exact 0.09 @ [0,21)
+[W1106 14:35:37.350682121 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 50331648 bytes (free: 43974656, total: 16750149632).
+[W1106 14:35:40.645630526 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 2 while trying to allocate 132120576 bytes (free: 106889216, total: 16750149632).
+[6/6] ko->fr | ru->de: 19.0s (prefill 1.7, clean 0.3, sweep 16.9) clean exact 0.71 orig 0.74; best steer_to_exact 0.12 @ [0,21)
+saved out_fast/Llama-2-7b-hf/steer_en_first_orig_ko.csv; total 166.0s
+PROFILE {'index': 6.28, 'rows_t0': 4944408, 'layers': 4.53, 'logits': 85.52, 'score': 16.85, 'rows_gen': 11140044, 'layers_gen': 34.25}
+peak GiB per device: [8.78, 8.89, 9.56] weights: [5.52, 3.77, 3.26]

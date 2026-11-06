@@ -1,0 +1,65 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.77s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.32s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.54s/it]
+dest2 | orig_metric_says_to | exact outcome : count
+  de | 0 | from    : 23
+  de | 0 | other   : 27
+  de | 0 | to_en   : 27
+  de | 1 | from    : 2
+  de | 1 | from_en : 1
+  de | 1 | other   : 29
+  de | 1 | to      : 20
+  de | 1 | to_en   : 4
+  fr | 0 | from    : 18
+  fr | 0 | other   : 29
+  fr | 0 | to_en   : 35
+  fr | 1 | other   : 21
+  fr | 1 | to      : 25
+  fr | 1 | to_en   : 5
+  ru | 0 | from    : 45
+  ru | 0 | other   : 62
+  ru | 0 | to_en   : 44
+  ru | 1 | from    : 1
+  ru | 1 | other   : 57
+  ru | 1 | to      : 57
+  zh | 0 | from    : 115
+  zh | 0 | other   : 95
+  zh | 0 | to_en   : 31
+  zh | 1 | other   : 18
+  zh | 1 | to      : 7
+examples credited by OLD metric but exact says ('zh', 'other')
+     target '日' got '日�' (1st tok '日')
+     target '五' got '五�' (1st tok '五')
+     target '四' got '四�' (1st tok '四')
+     target '办公室' got '��' (1st tok '<0xE5>')
+examples credited by OLD metric but exact says ('de', 'from_en')
+     target 'Ball' got 'Bridge"' (1st tok 'B')
+examples credited by OLD metric but exact says ('de', 'other')
+     target 'Buch' got 'Band' (1st tok 'B')
+     target 'Brücke' got 'Buch' (1st tok 'B')
+     target 'Kind' got 'Kinders' (1st tok 'Kind')
+     target 'Tag' got 'tagen' (1st tok 'tag')
+examples credited by OLD metric but exact says ('de', 'from')
+     target 'Gold' got 'Geschichte"' (1st tok 'G')
+     target 'Gesetz' got 'Generation"' (1st tok 'G')
+examples credited by OLD metric but exact says ('de', 'to_en')
+     target 'Haar' got 'hair"' (1st tok 'h')
+     target 'Mutter' got 'mother"' (1st tok 'm')
+     target 'Ozean' got 'ocean"' (1st tok 'o')
+     target 'Süden' got 'south"' (1st tok 's')
+examples credited by OLD metric but exact says ('fr', 'other')
+     target 'ballon' got 'balcon' (1st tok '▁bal')
+     target 'est' got 'estamp' (1st tok '▁est')
+     target 'échange' got 'échangeur' (1st tok 'é')
+     target 'feu' got 'feuilles' (1st tok 'fe')
+examples credited by OLD metric but exact says ('fr', 'to_en')
+     target 'forêt' got 'forest"' (1st tok 'for')
+     target 'loi' got 'Law"' (1st tok 'L')
+     target 'mère' got 'mother"' (1st tok 'm')
+     target 'paire' got 'pair"' (1st tok '▁pair')
+examples credited by OLD metric but exact says ('ru', 'other')
+     target 'красота' got 'краска' (1st tok '▁кра')
+     target 'книга' got 'клан' (1st tok 'к')
+     target 'пещера' got 'пред' (1st tok 'п')
+     target 'цвет' got 'цветы' (1st tok '▁ц')
+examples credited by OLD metric but exact says ('ru', 'from')
+     target 'девять' got 'друг"' (1st tok 'д')

@@ -1,0 +1,134 @@
+====================================================================================================
+Llama-2-7b-hf/steer_en_first_orig
+  model: Llama-2-7b-hf
+  n_perms: 24
+  clean_exact: 0.737
+  clean_orig: 0.822
+  best_window_exact: [np.int64(7), np.int64(22)]
+  clean_exact@best_exact: 0.737
+  steer_to_exact@best_exact: 0.147
+  steer_from_exact@best_exact: 0.243
+  steer_to_en_exact@best_exact: 0.238
+  steer_from_en_exact@best_exact: 0.008
+  steer_to_orig_acc@best_exact: 0.312
+  steer_from_orig_acc@best_exact: 0.181
+  steer_to_en_orig_acc@best_exact: 0.331
+  steer_from_en_orig_acc@best_exact: 0.042
+  best_window_orig: [np.int64(15), np.int64(22)]
+  steer_to_orig_acc_at_best_orig: 0.317
+  steer_to_exact_at_best_orig: 0.146
+  by_dest2@best_exact: {'de': {'steer_to_exact': 0.158, 'steer_to_orig_acc': 0.371, 'steer_from_exact': 0.165, 'steer_from_orig_acc': 0.183, 'steer_to_en_exact': 0.332}, 'fr': {'steer_to_exact': 0.195, 'steer_to_orig_acc': 0.365, 'steer_from_exact': 0.198, 'steer_from_orig_acc': 0.237, 'steer_to_en_exact': 0.352}, 'ru': {'steer_to_exact': 0.222, 'steer_to_orig_acc': 0.441, 'steer_from_exact': 0.188, 'steer_from_orig_acc': 0.221, 'steer_to_en_exact': 0.134}, 'zh': {'steer_to_exact': 0.014, 'steer_to_orig_acc': 0.073, 'steer_from_exact': 0.421, 'steer_from_orig_acc': 0.083, 'steer_to_en_exact': 0.133}}
+  sec_per_perm: 19.768
+  sec_total: 474.422
+====================================================================================================
+Llama-2-7b-hf/steer_en_first_orig_ko
+  model: Llama-2-7b-hf
+  n_perms: 6
+  clean_exact: 0.693
+  clean_orig: 0.786
+  best_window_exact: [np.int64(2), np.int64(21)]
+  clean_exact@best_exact: 0.693
+  steer_to_exact@best_exact: 0.045
+  steer_from_exact@best_exact: 0.411
+  steer_to_en_exact@best_exact: 0.035
+  steer_from_en_exact@best_exact: 0.008
+  steer_to_orig_acc@best_exact: 0.172
+  steer_from_orig_acc@best_exact: 0.256
+  steer_to_en_orig_acc@best_exact: 0.048
+  steer_from_en_orig_acc@best_exact: 0.023
+  best_window_orig: [np.int64(5), np.int64(21)]
+  steer_to_orig_acc_at_best_orig: 0.174
+  steer_to_exact_at_best_orig: 0.045
+  by_dest2@best_exact: {'de': {'steer_to_exact': 0.12, 'steer_to_orig_acc': 0.263, 'steer_from_exact': 0.466, 'steer_from_orig_acc': 0.481, 'steer_to_en_exact': 0.18}, 'ko': {'steer_to_exact': 0.015, 'steer_to_orig_acc': 0.126, 'steer_from_exact': 0.406, 'steer_from_orig_acc': 0.145, 'steer_to_en_exact': 0.008}, 'zh': {'steer_to_exact': 0.09, 'steer_to_orig_acc': 0.263, 'steer_from_exact': 0.376, 'steer_from_orig_acc': 0.474, 'steer_to_en_exact': 0.0}}
+  sec_per_perm: 26.659
+  sec_total: 159.953
+====================================================================================================
+Llama-2-7b-hf/steer_en_first_own
+  model: Llama-2-7b-hf
+  n_perms: 24
+  clean_exact: 0.737
+  clean_orig: 0.822
+  best_window_exact: [np.int64(14), np.int64(22)]
+  clean_exact@best_exact: 0.737
+  steer_to_exact@best_exact: 0.22
+  steer_from_exact@best_exact: 0.218
+  steer_to_en_exact@best_exact: 0.18
+  steer_from_en_exact@best_exact: 0.008
+  steer_to_orig_acc@best_exact: 0.417
+  steer_from_orig_acc@best_exact: 0.252
+  steer_to_en_orig_acc@best_exact: 0.249
+  steer_from_en_orig_acc@best_exact: 0.032
+  best_window_orig: [np.int64(14), np.int64(22)]
+  steer_to_orig_acc_at_best_orig: 0.417
+  steer_to_exact_at_best_orig: 0.22
+  by_dest2@best_exact: {'de': {'steer_to_exact': 0.278, 'steer_to_orig_acc': 0.5, 'steer_from_exact': 0.187, 'steer_from_orig_acc': 0.209, 'steer_to_en_exact': 0.127}, 'fr': {'steer_to_exact': 0.262, 'steer_to_orig_acc': 0.361, 'steer_from_exact': 0.202, 'steer_from_orig_acc': 0.221, 'steer_to_en_exact': 0.362}, 'ru': {'steer_to_exact': 0.248, 'steer_to_orig_acc': 0.447, 'steer_from_exact': 0.195, 'steer_from_orig_acc': 0.216, 'steer_to_en_exact': 0.18}, 'zh': {'steer_to_exact': 0.091, 'steer_to_orig_acc': 0.358, 'steer_from_exact': 0.289, 'steer_from_orig_acc': 0.363, 'steer_to_en_exact': 0.049}}
+  sec_per_perm: 18.833
+  sec_total: 451.999
+====================================================================================================
+Llama-2-7b-hf/steer_en_mean_orig
+  model: Llama-2-7b-hf
+  n_perms: 24
+  clean_exact: 0.737
+  clean_orig: 0.822
+  best_window_exact: [np.int64(7), np.int64(22)]
+  clean_exact@best_exact: 0.737
+  steer_to_exact@best_exact: 0.147
+  steer_from_exact@best_exact: 0.244
+  steer_to_en_exact@best_exact: 0.238
+  steer_from_en_exact@best_exact: 0.008
+  steer_to_orig_acc@best_exact: 0.312
+  steer_from_orig_acc@best_exact: 0.181
+  steer_to_en_orig_acc@best_exact: 0.331
+  steer_from_en_orig_acc@best_exact: 0.042
+  best_window_orig: [np.int64(15), np.int64(22)]
+  steer_to_orig_acc_at_best_orig: 0.317
+  steer_to_exact_at_best_orig: 0.146
+  by_dest2@best_exact: {'de': {'steer_to_exact': 0.158, 'steer_to_orig_acc': 0.371, 'steer_from_exact': 0.167, 'steer_from_orig_acc': 0.184, 'steer_to_en_exact': 0.332}, 'fr': {'steer_to_exact': 0.195, 'steer_to_orig_acc': 0.365, 'steer_from_exact': 0.198, 'steer_from_orig_acc': 0.237, 'steer_to_en_exact': 0.352}, 'ru': {'steer_to_exact': 0.222, 'steer_to_orig_acc': 0.441, 'steer_from_exact': 0.189, 'steer_from_orig_acc': 0.221, 'steer_to_en_exact': 0.134}, 'zh': {'steer_to_exact': 0.014, 'steer_to_orig_acc': 0.073, 'steer_from_exact': 0.422, 'steer_from_orig_acc': 0.083, 'steer_to_en_exact': 0.133}}
+  sec_per_perm: 19.911
+  sec_total: 477.875
+====================================================================================================
+Llama-2-7b-hf/steer_es_first_orig
+  model: Llama-2-7b-hf
+  n_perms: 24
+  clean_exact: 0.737
+  clean_orig: 0.822
+  best_window_exact: [np.int64(5), np.int64(22)]
+  clean_exact@best_exact: 0.737
+  steer_to_exact@best_exact: 0.013
+  steer_from_exact@best_exact: 0.631
+  steer_to_en_exact@best_exact: 0.002
+  steer_from_en_exact@best_exact: 0.034
+  steer_to_lat_exact@best_exact: 0.017
+  steer_to_orig_acc@best_exact: 0.031
+  steer_from_orig_acc@best_exact: 0.621
+  steer_to_en_orig_acc@best_exact: 0.017
+  steer_from_en_orig_acc@best_exact: 0.109
+  best_window_orig: [np.int64(18), np.int64(31)]
+  steer_to_orig_acc_at_best_orig: 0.063
+  steer_to_exact_at_best_orig: 0.01
+  by_dest2@best_exact: {'de': {'steer_to_exact': 0.009, 'steer_to_orig_acc': 0.036, 'steer_from_exact': 0.679, 'steer_from_orig_acc': 0.747, 'steer_to_en_exact': 0.004}, 'fr': {'steer_to_exact': 0.034, 'steer_to_orig_acc': 0.041, 'steer_from_exact': 0.69, 'steer_from_orig_acc': 0.726, 'steer_to_en_exact': 0.001}, 'ru': {'steer_to_exact': 0.008, 'steer_to_orig_acc': 0.033, 'steer_from_exact': 0.589, 'steer_from_orig_acc': 0.678, 'steer_to_en_exact': 0.0}, 'zh': {'steer_to_exact': 0.003, 'steer_to_orig_acc': 0.014, 'steer_from_exact': 0.566, 'steer_from_orig_acc': 0.335, 'steer_to_en_exact': 0.003}}
+  sec_per_perm: 20.023
+  sec_total: 480.546
+====================================================================================================
+Llama-2-7b-hf/steer_es_mean_orig
+  model: Llama-2-7b-hf
+  n_perms: 24
+  clean_exact: 0.737
+  clean_orig: 0.822
+  best_window_exact: [np.int64(6), np.int64(22)]
+  clean_exact@best_exact: 0.737
+  steer_to_exact@best_exact: 0.01
+  steer_from_exact@best_exact: 0.641
+  steer_to_en_exact@best_exact: 0.002
+  steer_from_en_exact@best_exact: 0.035
+  steer_to_lat_exact@best_exact: 0.015
+  steer_to_orig_acc@best_exact: 0.023
+  steer_from_orig_acc@best_exact: 0.63
+  steer_to_en_orig_acc@best_exact: 0.013
+  steer_from_en_orig_acc@best_exact: 0.111
+  best_window_orig: [np.int64(20), np.int64(31)]
+  steer_to_orig_acc_at_best_orig: 0.024
+  steer_to_exact_at_best_orig: 0.004
+  by_dest2@best_exact: {'de': {'steer_to_exact': 0.008, 'steer_to_orig_acc': 0.026, 'steer_from_exact': 0.689, 'steer_from_orig_acc': 0.761, 'steer_to_en_exact': 0.005}, 'fr': {'steer_to_exact': 0.023, 'steer_to_orig_acc': 0.023, 'steer_from_exact': 0.698, 'steer_from_orig_acc': 0.737, 'steer_to_en_exact': 0.0}, 'ru': {'steer_to_exact': 0.009, 'steer_to_orig_acc': 0.031, 'steer_from_exact': 0.609, 'steer_from_orig_acc': 0.695, 'steer_to_en_exact': 0.0}, 'zh': {'steer_to_exact': 0.003, 'steer_to_orig_acc': 0.014, 'steer_from_exact': 0.566, 'steer_from_orig_acc': 0.328, 'steer_to_en_exact': 0.003}}
+  sec_per_perm: 19.684
+  sec_total: 472.42
